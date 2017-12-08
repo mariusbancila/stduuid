@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -26,10 +23,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="test_win.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="test_win.cpp">
+    <ClCompile Include="..\..\src\uuid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

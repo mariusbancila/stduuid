@@ -92,6 +92,7 @@ namespace uuids
 
    public:
       constexpr uuid() {}
+      constexpr uuid(std::array<uint8_t, 16> const & bytes) :data{bytes} {}
 
       variant_type variant() const noexcept
       {
@@ -212,6 +213,8 @@ namespace uuids
          << std::setw(2) << (int)id.data[14]
          << std::setw(2) << (int)id.data[15];
    }
+
+   uuid make_uuid();
 }
 
 namespace std
