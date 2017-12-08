@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include <array>
+#include <string_view>
 
 namespace uuids
 {
@@ -59,6 +60,7 @@ namespace uuids
    // indicated by a bit pattern in octet 6, marked with M in xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx
    enum class version_type
    {
+      none = 0, // only possible for nil or invalid uuids
       time_based = 1,  // The time-based version specified in RFC 4122
       dce_security = 2,  // DCE Security version, with embedded POSIX UIDs.
       name_based_md5 = 3,  // The name-based version specified in RFS 4122 with MD5 hashing
@@ -91,10 +93,17 @@ namespace uuids
       typedef std::ptrdiff_t  difference_type;
 
    public:
-      constexpr uuid() {}
-      constexpr uuid(std::array<uint8_t, 16> const & bytes) :data{bytes} {}
+      constexpr explicit uuid() {}
+      constexpr explicit uuid(std::array<uint8_t, 16> const & bytes) :data{bytes} {}
+      explicit uuid(uint8_t const * const bytes)
+      {
+         std::copy(bytes, bytes + 16, std::begin(data));
+      }
 
-      variant_type variant() const noexcept
+      explicit uuid(std::string const & str);
+      explicit uuid(std::wstring const & str);
+
+      constexpr variant_type variant() const noexcept
       {
          if ((data[8] & 0x80) == 0x00)
             return variant_type::ncs;
@@ -106,7 +115,7 @@ namespace uuids
             return variant_type::future;
       }
 
-      version_type version() const
+      constexpr version_type version() const
       {
          if ((data[6] & 0xF0) == 0x10)
             return version_type::time_based;
@@ -119,14 +128,14 @@ namespace uuids
          else if ((data[6] & 0xF0) == 0x50)
             return version_type::name_based_sha1;
          else
-            throw guid_exception("invalid guid");
+            return version_type::none;
       }
 
-      std::size_t size() const noexcept { return 16; }
+      constexpr std::size_t size() const noexcept { return 16; }
 
-      bool is_nil() const noexcept
+      constexpr bool is_nil() const noexcept
       {
-         for (auto const e : data) if (e != 0) return false;
+         for (size_t i = 0; i < data.size(); ++i) if (data[i] != 0) return false;
          return true;
       }
 
@@ -173,6 +182,9 @@ namespace uuids
       std::array<uint8_t, 16> data{ 0 };
 
       friend bool operator==(uuid const & lhs, uuid const & rhs) noexcept;
+
+      template <typename TChar>
+      void create(TChar const * const str, size_t const size);
 
       template <class Elem, class Traits>
       friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);

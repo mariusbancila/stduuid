@@ -8,8 +8,83 @@
 #include <CoreFoundation/CFUUID.h>
 #endif
 
+namespace 
+{
+   template <typename TChar>
+   constexpr inline unsigned char hex2char(TChar const ch)
+   {
+      if (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9'))
+         return ch - static_cast<TChar>('0');
+      if (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f'))
+         return 10 + ch - static_cast<TChar>('a');
+      if (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'))
+         return 10 + ch - static_cast<TChar>('A');
+      return 0;
+   }
+   
+   template <typename TChar>
+   constexpr inline bool is_hex(TChar const ch)
+   {
+      return 
+         (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9')) ||
+         (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f')) ||
+         (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'));
+   }
+
+   template <typename TChar>
+   constexpr inline unsigned char hexpair2char(TChar const a, TChar const b)
+   {
+      return (hex2char(a) << 4) | hex2char(b);
+   }
+}
+
 namespace uuids
 {
+   uuid::uuid(std::string const & str)
+   {
+      create(str.c_str(), str.size());
+   }
+
+   uuid::uuid(std::wstring const & str)
+   {
+      create(str.c_str(), str.size());
+   }
+
+   template <typename TChar>
+   void uuid::create(TChar const * const str, size_t const size)
+   {
+      TChar digit = 0;
+      bool firstdigit = true;
+      size_t index = 0;
+
+      for (size_t i = 0; i < size; ++i)
+      {
+         if (str[i] == static_cast<TChar>('-')) continue;
+
+         if (index >= 16 || !is_hex(str[i]))
+         {
+            std::fill(std::begin(data), std::end(data), 0);
+            return;
+         }
+
+         if (firstdigit)
+         {
+            digit = str[i];
+            firstdigit = false;
+         }
+         else
+         {
+            data[index++] = hexpair2char(digit, str[i]);
+            firstdigit = true;
+         }
+      }
+
+      if (index < 16)
+      {
+         std::fill(std::begin(data), std::end(data), 0);
+      }
+   }
+
    uuid make_uuid()
    {
 #ifdef _WIN32
