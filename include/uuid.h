@@ -31,7 +31,7 @@ namespace uuids
    // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
    // indicated by a bit pattern in octet 8, marked with N in xxxxxxxx-xxxx-xxxx-Nxxx-xxxxxxxxxxxx
-   enum class variant_type
+   enum class uuid_variant
    {
       // NCS backward compatibility (with the obsolete Apollo Network Computing System 1.5 UUID format)
       // N bit pattern: 0xxx
@@ -58,7 +58,7 @@ namespace uuids
    };
 
    // indicated by a bit pattern in octet 6, marked with M in xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx
-   enum class version_type
+   enum class uuid_version
    {
       none = 0, // only possible for nil or invalid uuids
       time_based = 1,  // The time-based version specified in RFC 4122
@@ -66,19 +66,6 @@ namespace uuids
       name_based_md5 = 3,  // The name-based version specified in RFS 4122 with MD5 hashing
       random_number_based = 4,  // The randomly or pseudo-randomly generated version specified in RFS 4122
       name_based_sha1 = 5   // The name-based version specified in RFS 4122 with SHA1 hashing
-   };
-
-   struct guid_exception : public std::runtime_error
-   {
-      explicit guid_exception(std::string const & message)
-         : std::runtime_error(message.c_str())
-      {
-      }
-
-      explicit guid_exception(char const * const message)
-         : std::runtime_error(message)
-      {
-      }
    };
 
    struct uuid
@@ -103,32 +90,32 @@ namespace uuids
       explicit uuid(std::string const & str);
       explicit uuid(std::wstring const & str);
 
-      constexpr variant_type variant() const noexcept
+      constexpr uuid_variant variant() const noexcept
       {
          if ((data[8] & 0x80) == 0x00)
-            return variant_type::ncs;
+            return uuid_variant::ncs;
          else if ((data[8] & 0xC0) == 0x80)
-            return variant_type::rfc;
+            return uuid_variant::rfc;
          else if ((data[8] & 0xE0) == 0xC0)
-            return variant_type::microsoft;
+            return uuid_variant::microsoft;
          else
-            return variant_type::future;
+            return uuid_variant::future;
       }
 
-      constexpr version_type version() const
+      constexpr uuid_version version() const
       {
          if ((data[6] & 0xF0) == 0x10)
-            return version_type::time_based;
+            return uuid_version::time_based;
          else if ((data[6] & 0xF0) == 0x20)
-            return version_type::dce_security;
+            return uuid_version::dce_security;
          else if ((data[6] & 0xF0) == 0x30)
-            return version_type::name_based_md5;
+            return uuid_version::name_based_md5;
          else if ((data[6] & 0xF0) == 0x40)
-            return version_type::random_number_based;
+            return uuid_version::random_number_based;
          else if ((data[6] & 0xF0) == 0x50)
-            return version_type::name_based_sha1;
+            return uuid_version::name_based_sha1;
          else
-            return version_type::none;
+            return uuid_version::none;
       }
 
       constexpr std::size_t size() const noexcept { return 16; }
@@ -182,6 +169,7 @@ namespace uuids
       std::array<uint8_t, 16> data{ 0 };
 
       friend bool operator==(uuid const & lhs, uuid const & rhs) noexcept;
+      friend bool operator<(uuid const & lhs, uuid const & rhs) noexcept;
 
       template <typename TChar>
       void create(TChar const * const str, size_t const size);
@@ -198,6 +186,11 @@ namespace uuids
    inline bool operator!= (uuid const& lhs, uuid const& rhs) noexcept
    {
       return !(lhs == rhs);
+   }
+
+   inline bool operator< (uuid const& lhs, uuid const& rhs) noexcept
+   {
+      return lhs.data < rhs.data;
    }
 
    template <class Elem, class Traits>
