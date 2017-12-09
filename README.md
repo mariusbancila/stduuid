@@ -12,8 +12,11 @@ sentation (in lowercase)
 * `uuid_variant` is a strongly type enum representing the type of a UUID
 * `uuid_version` is a strongly type enum representing the version of a UUID
 * `make_uuid` is a parameterless function that creates a new UUID using the typical platform-specific method to create one (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac).
-* `operator==` and `operator!=` for UUIDs comparison
+* `operator==` and `operator!=` for UUIDs comparison for equality/inequality
+* `operator<` for comparing whether one UUIDs is less than another. Although this operation does not make much logical sense, it is necessary in order to store UUIDs in a std::set.
 * `operator<<` to write a UUID to an output string using the standard repre
+* `std::swap<>` specialization for `uuid`
+* `std::hash<>` specialization for `uuid`, necessary for storing UUIDs in unordered associative containers, such as `std::unordered_set`
 
 This project is currently under development and should be ignored until further notice.
 
@@ -74,9 +77,49 @@ empty.swap(guid);
 assert(empty.is_nil());
 assert(!guid.is_nil());
 ```
-* Convert to string
+* Converting to string
 ```
 uuid empty;
 assert(empty.string() == "00000000-0000-0000-0000-000000000000");
 assert(empty.wstring() == L"00000000-0000-0000-0000-000000000000");
 ```
+* Using with an orderered associative container
+```
+std::set<uuids::uuid> ids{
+   uuid{},
+   uuids::make_uuid(),
+   uuids::make_uuid(),
+   uuids::make_uuid(),
+   uuids::make_uuid()
+};
+
+assert(ids.size() == 5);
+assert(ids.find(uuid{}) != ids.end());
+```
+* Using in an unordered associative container
+```
+std::unordered_set<uuids::uuid> ids{
+   uuid{},
+   uuids::make_uuid(),
+   uuids::make_uuid(),
+   uuids::make_uuid(),
+   uuids::make_uuid()
+};
+
+assert(ids.size() == 5);
+assert(ids.find(uuid{}) != ids.end());
+```
+* Hashing UUIDs
+```
+auto h1 = std::hash<std::string>{};
+auto h2 = std::hash<uuid>{};
+assert(h1(str) == h2(guid));
+```
+
+## Limitations
+The library can only create new uuids using the underlaying operating system resources. 
+
+An alternative to this library could be the [boost::uuid](http://www.boost.org/doc/libs/1_65_1/libs/uuid/) library. This has a similar model, but supports creating all variant of uuids, including md5 and sha1 name based, time based, and random number based values.
+
+## Support
+The library is supported on all major operating systems.
