@@ -122,4 +122,12 @@ The library can only create new uuids using the underlaying operating system res
 An alternative to this library could be the [boost::uuid](http://www.boost.org/doc/libs/1_65_1/libs/uuid/) library. This has a similar model, but supports creating all variant of uuids, including md5 and sha1 name based, time based, and random number based values.
 
 ## Support
-The library is supported on all major operating systems.
+The library is supported on all major operating systems: Windows, Linux and Mac OS.
+
+## Testing
+A testing project is available in the sources. To build and execute the tests do the following:
+* Clone or download this repository
+* Create a `build` directory in the root directory of the sources
+* Run the command `cmake ..` from the `build` directory; if you do not have CMake you must install it first.
+* Build the project created in the previous step
+* Run the executable.
