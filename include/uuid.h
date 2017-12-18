@@ -102,7 +102,7 @@ namespace uuids
             return uuid_variant::future;
       }
 
-      constexpr uuid_version version() const
+      constexpr uuid_version version() const noexcept
       {
          if ((data[6] & 0xF0) == 0x10)
             return uuid_version::time_based;

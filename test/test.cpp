@@ -21,9 +21,16 @@ int main()
 
       using namespace std::string_literals;
 
-      auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
-      uuid guid(str);
-      assert(guid.string() == str);
+      {
+         auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
+         uuid guid(str);
+         assert(guid.string() == str);
+      }
+
+      {
+         uuid guid("47183823-2574-4bfd-b411-99ed177d3e43");
+         assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+      }
    }
 
    {
@@ -34,6 +41,39 @@ int main()
       auto str = L"47183823-2574-4bfd-b411-99ed177d3e43"s;
       uuid guid(str);
       assert(guid.wstring() == str);
+   }
+
+   {
+      std::cout << "Test std::array constructor" << std::endl;
+
+      std::array<uint8_t, 16> arr{
+         0x47, 0x18, 0x38, 0x23, 
+         0x25, 0x74, 
+         0x4b, 0xfd, 
+         0xb4, 0x11,
+         0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
+      };
+
+      using namespace std::string_literals;
+
+      uuid guid(arr);
+      assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+   }
+
+   {
+      std::cout << "Test array constructor" << std::endl;
+
+      using namespace std::string_literals;
+
+      uint8_t arr[16] = {
+         0x47, 0x18, 0x38, 0x23,
+         0x25, 0x74,
+         0x4b, 0xfd,
+         0xb4, 0x11,
+         0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
+      };
+      uuid guid(arr);
+      assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
    }
 
    {
