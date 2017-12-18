@@ -324,6 +324,10 @@ namespace std
 
 ## V. Limitations
 
+The library does not support creating different versions of UUIDs. Generating version 3 (name-based versiong using MD5 hashing) and version 5 (name-based version using SHA1 hashing) are made impossible by the lack of standard support for MD5 and SHA1 cryptographic hash function. Instead, the library relies on the underlying operating system functionalities for creating UUIDs.
+
+This limitation should be irrelevant for most practical use cases. In the event UUIDs need to be generated with a specific version other than the one provided by the underlying system, users can resort to a 3rd party implementation such as `boost::uuid`.
+
 ## VI. References
 
 * [1] Universally unique identifier, https://en.wikipedia.org/wiki/Universally_unique_identifier
