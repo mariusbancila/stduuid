@@ -49,12 +49,12 @@ uuid id2(str);
 The conversion constructor from `std::array<uint8_t, 16>` enables the construction of a `uuid` from an array of bytes.
 
 ```
-std::array<uint8_t, 16> arr{
+std::array<uint8_t, 16> arr{{
    0x47, 0x18, 0x38, 0x23, 
    0x25, 0x74, 
    0x4b, 0xfd, 
    0xb4, 0x11,
-   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
 uuid id(arr);
 ```
 
@@ -96,12 +96,12 @@ assert(id.wstring() == L"47183823-2574-4bfd-b411-99ed177d3e43");
 Constant and mutable iterators allow direct access to the underlaying `uuid` data. This enables both direct reading and writing of the `uuid` bits.
 
 ```
-std::array<uint8_t, 16> arr{
+std::array<uint8_t, 16> arr{{
    0x47, 0x18, 0x38, 0x23,
    0x25, 0x74,
    0x4b, 0xfd,
    0xb4, 0x11,
-   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
 
 uuid id;
 assert(id.nil());
