@@ -12,7 +12,7 @@ int main()
       std::cout << "Test default constructor" << std::endl;
 
       uuid empty;
-      assert(empty.is_nil());
+      assert(empty.nil());
       assert(empty.size() == 16);
    }
 
@@ -40,7 +40,7 @@ int main()
       std::cout << "Test make" << std::endl;
 
       uuid const guid = uuids::make_uuid();
-      assert(!guid.is_nil());
+      assert(!guid.nil());
       assert(guid.size() == 16);
       assert(guid.version() == uuids::uuid_version::random_number_based);
       assert(guid.variant() == uuids::uuid_variant::rfc);
@@ -106,18 +106,18 @@ int main()
       uuid empty;
       uuid guid = uuids::make_uuid();
 
-      assert(empty.is_nil());
-      assert(!guid.is_nil());
+      assert(empty.nil());
+      assert(!guid.nil());
 
       std::swap(empty, guid);
 
-      assert(!empty.is_nil());
-      assert(guid.is_nil());
+      assert(!empty.nil());
+      assert(guid.nil());
 
       empty.swap(guid);
 
-      assert(empty.is_nil());
-      assert(!guid.is_nil());
+      assert(empty.nil());
+      assert(!guid.nil());
    }
 
    {
@@ -132,7 +132,7 @@ int main()
       std::cout << "Test constexpr" << std::endl;
 
       constexpr uuid empty;
-      constexpr bool isnil = empty.is_nil();
+      constexpr bool isnil = empty.nil();
       constexpr size_t size = empty.size();
       constexpr uuid_variant variant = empty.variant();
       constexpr uuid_version version = empty.version();

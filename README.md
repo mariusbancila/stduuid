@@ -25,13 +25,13 @@ The following is a list of examples for using the library:
 * Creating a nil UUID
 ```
 uuid empty;
-assert(empty.is_nil());
+assert(empty.nil());
 assert(empty.size() == 16);
 ```
 * Creating a new UUID
 ```
 uuid const guid = uuids::make_uuid();
-assert(!guid.is_nil());
+assert(!guid.nil());
 assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::random_number_based);
 assert(guid.variant() == uuids::uuid_variant::rfc);
@@ -64,18 +64,18 @@ assert(empty != guid);
 uuid empty;
 uuid guid = uuids::make_uuid();
 
-assert(empty.is_nil());
-assert(!guid.is_nil());
+assert(empty.nil());
+assert(!guid.nil());
 
 std::swap(empty, guid);
 
-assert(!empty.is_nil());
-assert(guid.is_nil());
+assert(!empty.nil());
+assert(guid.nil());
 
 empty.swap(guid);
 
-assert(empty.is_nil());
-assert(!guid.is_nil());
+assert(empty.nil());
+assert(!guid.nil());
 ```
 * Converting to string
 ```

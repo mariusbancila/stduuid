@@ -120,7 +120,7 @@ namespace uuids
 
       constexpr std::size_t size() const noexcept { return 16; }
 
-      constexpr bool is_nil() const noexcept
+      constexpr bool nil() const noexcept
       {
          for (size_t i = 0; i < data.size(); ++i) if (data[i] != 0) return false;
          return true;

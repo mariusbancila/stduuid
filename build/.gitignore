@@ -1,0 +1,6 @@
+#ignore all
+/*
+
+# keep these files
+!.gitignore
+!readme.txt
