@@ -14,7 +14,60 @@ This proposal is a pure library extension. It does not require changes to any st
 
 ## III. Design Decisions
 
+The proposed library, that should be available in a new header called `<uuid>` in the namespace `std::uuids`, provides:
+* a class called `uuid` that represents a universally unique identifier
+* strongly type enums `uuid_variant` and `uuid_version` to represent the possible variant and version types of a UUID
+* a `make_uuid` function to generate a new UUID
+* comparison operators `==`, `!=`, `<`
+* `std::swap<>` specialization for `uuid`
+* `std::hash<>` specialization for `uuid`
 
+### Default constructor
+
+Creates a nil UUID that has all the bits set to 0 (i.e. 00000000-0000-0000-0000-000000000000).
+
+```
+uuid empty;
+auto empty = uuid{};
+```
+
+### string constructors
+
+Conversion constructors from `std::string` and `std::wstring` allow to create `uuid` instances from a string. 
+
+The input argument must have the form `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` where `x` is a hexadecimal digit. Should the argument be of a different format a nil UUID would be created. 
+
+```
+uuid id1("47183823-2574-4bfd-b411-99ed177d3e43");
+
+std::wstring str=L"47183823-2574-4bfd-b411-99ed177d3e43";
+uuid id2(str);
+```
+
+### array constructors
+
+The conversion constructor from `std::array<uint8_t, 16>` enables the construction of a `uuid` from an array of bytes.
+
+```
+std::array<uint8_t, 16> arr{
+   0x47, 0x18, 0x38, 0x23, 
+   0x25, 0x74, 
+   0x4b, 0xfd, 
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
+uuid id(arr);
+```
+
+A conversion constructor from `uint8_t*` also exists to construct `uuid`s from C-like arrays. This requires the input buffer to have at least 16 bytes. The behavior when the buffer does not have 16 bytes is undefined.
+```
+uint8_t arr[16] = {
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
+uuid id(arr);
+```      
 
 ## IV. Technical Specifications
 
