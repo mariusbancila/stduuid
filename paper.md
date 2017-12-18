@@ -4,7 +4,7 @@
 
 Universally unique identifiers (*uuid*), also known as Globally Unique Identifiers (*guid*s), are commonly used in many types of applications to uniquely identify data. A standard uuid library would benefit developers that currently have to either use operating system specific APIs for creating new uuids or resort to 3rd party libraries, such as *boost::uuid*.
 
-UUIDs are 128-bit numbers that are for most practical purposes unique, without depending on a central registration authority for ensuring their uniqueness. Although the probability of UUID duplication exists, it is negligible. According to Wikipedia, "*for there to be a one in a billion chance of duplication, 103 trillion version 4 UUIDs must be generated.*"
+UUIDs are 128-bit numbers that are for most practical purposes unique, without depending on a central registration authority for ensuring their uniqueness. Although the probability of UUID duplication exists, it is negligible. According to Wikipedia, "*for there to be a one in a billion chance of duplication, 103 trillion version 4 UUIDs must be generated.*" UUID is an Internet Engineering Task Force standard described by RFC 4122.
 
 The library proposed on this paper is a lite one: it enables developers to generate UUIDs based on the operation system facilities, serialize and deserialize UUIDs to and frmo strings, validate UUIDs and other common ensuing operations.
 
@@ -31,7 +31,7 @@ uuid empty;
 auto empty = uuid{};
 ```
 
-### string constructors
+### String constructors
 
 Conversion constructors from `std::string` and `std::wstring` allow to create `uuid` instances from a string. 
 
@@ -44,7 +44,7 @@ std::wstring str=L"47183823-2574-4bfd-b411-99ed177d3e43";
 uuid id2(str);
 ```
 
-### array constructors
+### Array constructors
 
 The conversion constructor from `std::array<uint8_t, 16>` enables the construction of a `uuid` from an array of bytes.
 
@@ -68,6 +68,28 @@ uint8_t arr[16] = {
    0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
 uuid id(arr);
 ```      
+
+### Capacity
+
+Member function `size()` indicates the number of bytes in the UUID. Because this is a fixed size structure this function always returns 16.
+
+Member function `nil()` indicates whether the `uuid` has all the bits set to 0. A nil uuid is created by the default constructor or by the string conversion constructors when failing to parse the input argument.
+
+```
+uuid id;
+assert(id.nil());
+assert(id.size() == 16);
+```
+
+### String conversion
+
+Member functions `string` and `wstring` return a string with the UUID formatted to the canonical textual representation `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`, where `x` is a lower case hexadecimal digit.
+
+```
+uuid id("47183823-2574-4bfd-b411-99ed177d3e43");
+assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
+assert(id.wstring() == L"47183823-2574-4bfd-b411-99ed177d3e43");
+```         
 
 ## IV. Technical Specifications
 
