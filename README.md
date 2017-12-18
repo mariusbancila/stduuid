@@ -50,6 +50,28 @@ auto str = L"47183823-2574-4bfd-b411-99ed177d3e43"s;
 uuid guid(str);
 assert(guid.wstring() == str);      
 ```
+* Creating a UUID from an array
+```
+std::array<uint8_t, 16> arr{
+   0x47, 0x18, 0x38, 0x23, 
+   0x25, 0x74, 
+   0x4b, 0xfd, 
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
+uuid guid(arr);
+assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
+```
+or 
+```
+uint8_t arr[16] = {
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
+uuid guid(arr);
+assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
+```
 * Comparing UUIDS
 ```
 uuid empty;
@@ -82,6 +104,26 @@ assert(!guid.nil());
 uuid empty;
 assert(empty.string() == "00000000-0000-0000-0000-000000000000");
 assert(empty.wstring() == L"00000000-0000-0000-0000-000000000000");
+```
+* Iterating through the UUID data
+```
+std::array<uint8_t, 16> arr{
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
+
+uuid guid;
+assert(guid.nil());
+
+std::copy(std::cbegin(arr), std::cend(arr), std::begin(guid));
+assert(!guid.nil());
+assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
+
+size_t i = 0;
+for (auto const & b : guid)
+   assert(arr[i++] == b);
 ```
 * Using with an orderered associative container
 ```
