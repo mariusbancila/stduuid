@@ -47,13 +47,13 @@ int main()
    {
       std::cout << "Test std::array constructor" << std::endl;
 
-      std::array<uint8_t, 16> arr{
+      std::array<uint8_t, 16> arr{{
          0x47, 0x18, 0x38, 0x23, 
          0x25, 0x74, 
          0x4b, 0xfd, 
          0xb4, 0x11,
          0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
-      };
+      }};
 
       using namespace std::string_literals;
 
@@ -172,13 +172,13 @@ int main()
    {
       std::cout << "Test iterators" << std::endl;
 
-      std::array<uint8_t, 16> arr{
+      std::array<uint8_t, 16> arr{{
          0x47, 0x18, 0x38, 0x23,
          0x25, 0x74,
          0x4b, 0xfd,
          0xb4, 0x11,
          0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
-      };
+      }};
 
       uuid guid;
       assert(guid.nil());
