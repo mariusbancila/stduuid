@@ -93,7 +93,7 @@ namespace uuids
       ::CoCreateGuid(&newId);
 
       std::array<unsigned char, 16> bytes =
-      {
+      {{
          (unsigned char)((newId.Data1 >> 24) & 0xFF),
          (unsigned char)((newId.Data1 >> 16) & 0xFF),
          (unsigned char)((newId.Data1 >> 8) & 0xFF),
@@ -113,7 +113,7 @@ namespace uuids
          (unsigned char)newId.Data4[5],
          (unsigned char)newId.Data4[6],
          (unsigned char)newId.Data4[7]
-      };
+      }};
 
       return uuid{ bytes };
 
@@ -129,7 +129,7 @@ namespace uuids
       CFRelease(newId);
 
       std::array<unsigned char, 16> byteArray =
-      {
+      {{
          bytes.byte0,
          bytes.byte1,
          bytes.byte2,
@@ -146,7 +146,7 @@ namespace uuids
          bytes.byte13,
          bytes.byte14,
          bytes.byte15
-      };
+      }};
       return uuid{ byteArray };
 #elif
       return uuid{};
