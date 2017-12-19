@@ -17,7 +17,7 @@ int main()
    }
 
    {
-      std::cout << "Test string constructor" << std::endl;
+      std::cout << "Test string_view constructor" << std::endl;
 
       using namespace std::string_literals;
 
@@ -35,7 +35,7 @@ int main()
    }
 
    {
-      std::cout << "Test wstring constructor" << std::endl;
+      std::cout << "Test wstring_view constructor" << std::endl;
 
       using namespace std::string_literals;
 
@@ -45,36 +45,35 @@ int main()
    }
 
    {
-      std::cout << "Test std::array constructor" << std::endl;
-
-      std::array<std::byte, 16> arr{{
-         std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-         std::byte{ 0x25 }, std::byte{ 0x74 },
-         std::byte{ 0x4b }, std::byte{ 0xfd },
-         std::byte{ 0xb4 }, std::byte{ 0x11 },
-         std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
-      }};
+      std::cout << "Test iterators constructor" << std::endl;
 
       using namespace std::string_literals;
 
-      uuid guid(std::begin(arr), std::end(arr));
-      assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
-   }
+      {
+         std::array<std::byte, 16> arr{ {
+            std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
+            std::byte{ 0x25 }, std::byte{ 0x74 },
+            std::byte{ 0x4b }, std::byte{ 0xfd },
+            std::byte{ 0xb4 }, std::byte{ 0x11 },
+            std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
+         } };
 
-   {
-      std::cout << "Test array constructor" << std::endl;
+         uuid guid(std::begin(arr), std::end(arr));
+         assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+      }
 
-      using namespace std::string_literals;
+      {
+         std::byte arr[16] = {
+            std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
+            std::byte{ 0x25 }, std::byte{ 0x74 },
+            std::byte{ 0x4b }, std::byte{ 0xfd },
+            std::byte{ 0xb4 }, std::byte{ 0x11 },
+            std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
+         };
 
-      std::byte arr[16] = {
-         std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-         std::byte{ 0x25 }, std::byte{ 0x74 },
-         std::byte{ 0x4b }, std::byte{ 0xfd },
-         std::byte{ 0xb4 }, std::byte{ 0x11 },
-         std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
-      };
-      uuid guid(std::begin(arr), std::end(arr));
-      assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+         uuid guid(std::begin(arr), std::end(arr));
+         assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+      }
    }
 
    {
