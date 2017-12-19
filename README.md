@@ -52,25 +52,26 @@ assert(guid.wstring() == str);
 ```
 * Creating a UUID from an array
 ```
-std::array<uint8_t, 16> arr{{
-   0x47, 0x18, 0x38, 0x23, 
-   0x25, 0x74, 
-   0x4b, 0xfd, 
-   0xb4, 0x11,
-   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
-uuid guid(arr);
+std::array<std::byte, 16> arr{{
+   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
+   std::byte{ 0x25 }, std::byte{ 0x74 },
+   std::byte{ 0x4b }, std::byte{ 0xfd },
+   std::byte{ 0xb4 }, std::byte{ 0x11 },
+   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
+}};
+uuid guid(std::begin(arr), std::end(arr));
 assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
 ```
 or 
 ```
-uint8_t arr[16] = {
-   0x47, 0x18, 0x38, 0x23,
-   0x25, 0x74,
-   0x4b, 0xfd,
-   0xb4, 0x11,
-   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
-uuid guid(arr);
-assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
+std::byte arr[16] = {
+   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
+   std::byte{ 0x25 }, std::byte{ 0x74 },
+   std::byte{ 0x4b }, std::byte{ 0xfd },
+   std::byte{ 0xb4 }, std::byte{ 0x11 },
+   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 } };
+uuid guid(std::begin(arr), std::end(arr));
+assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
 ```
 * Comparing UUIDS
 ```
@@ -107,12 +108,13 @@ assert(empty.wstring() == L"00000000-0000-0000-0000-000000000000");
 ```
 * Iterating through the UUID data
 ```
-std::array<uint8_t, 16> arr{{
-   0x47, 0x18, 0x38, 0x23,
-   0x25, 0x74,
-   0x4b, 0xfd,
-   0xb4, 0x11,
-   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
+std::array<std::byte, 16> arr{{
+   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
+   std::byte{ 0x25 }, std::byte{ 0x74 },
+   std::byte{ 0x4b }, std::byte{ 0xfd },
+   std::byte{ 0xb4 }, std::byte{ 0x11 },
+   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
+}};
 
 uuid guid;
 assert(guid.nil());

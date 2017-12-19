@@ -6,7 +6,7 @@ Universally unique identifiers (*uuid*), also known as Globally Unique Identifie
 
 UUIDs are 128-bit numbers that are for most practical purposes unique, without depending on a central registration authority for ensuring their uniqueness. Although the probability of UUID duplication exists, it is negligible. According to Wikipedia, "*for there to be a one in a billion chance of duplication, 103 trillion version 4 UUIDs must be generated.*" UUID is an Internet Engineering Task Force standard described by RFC 4122.
 
-The library proposed on this paper is a lite one: it enables developers to generate UUIDs based on the operation system facilities, serialize and deserialize UUIDs to and frmo strings, validate UUIDs and other common ensuing operations.
+The library proposed on this paper is a light one: it enables developers to generate UUIDs based on the operation system facilities, serialize and deserialize UUIDs to and from strings, validate UUIDs and other common ensuing operations.
 
 ## II. Impact On the Standard
 
@@ -14,7 +14,7 @@ This proposal is a pure library extension. It does not require changes to any st
 
 ## III. Design Decisions
 
-The proposed library, that should be available in a new header called `<uuid>` in the namespace `std::uuids`, provides:
+The proposed library, that should be available in a new header called `<uuid>` in the namespace `std`, provides:
 * a class called `uuid` that represents a universally unique identifier
 * strongly type enums `uuid_variant` and `uuid_version` to represent the possible variant and version types of a UUID
 * a `make_uuid` function to generate a new UUID
@@ -31,9 +31,9 @@ uuid empty;
 auto empty = uuid{};
 ```
 
-### String constructors
+### string_view constructors
 
-Conversion constructors from `std::string` and `std::wstring` allow to create `uuid` instances from a string. 
+Conversion constructors from `std::string_view` and `std::wstring_view` allow to create `uuid` instances from various strings. 
 
 The input argument must have the form `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx` where `x` is a hexadecimal digit. Should the argument be of a different format a nil UUID would be created. 
 
@@ -44,28 +44,27 @@ std::wstring str=L"47183823-2574-4bfd-b411-99ed177d3e43";
 uuid id2(str);
 ```
 
-### Array constructors
+### Iterators constructors
 
-The conversion constructor from `std::array<uint8_t, 16>` enables the construction of a `uuid` from an array of bytes.
+The conversion constructor that takes two forward iterators constructs an `uuid` with the content of the range \[first, last). It requires the range to have exactly 16 elements, otherwise the result is a nil `uuid`. This constructor follows the conventions of other containers in the standard library.
 
 ```
-std::array<uint8_t, 16> arr{{
-   0x47, 0x18, 0x38, 0x23, 
-   0x25, 0x74, 
-   0x4b, 0xfd, 
-   0xb4, 0x11,
-   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
+std::array<std::byte, 16> arr{{
+   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
+   std::byte{ 0x25 }, std::byte{ 0x74 },
+   std::byte{ 0x4b }, std::byte{ 0xfd },
+   std::byte{ 0xb4 }, std::byte{ 0x11 },
+   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 } }};
 uuid id(arr);
 ```
 
-A conversion constructor from `uint8_t*` also exists to construct `uuid`s from C-like arrays. This requires the input buffer to have at least 16 bytes. The behavior when the buffer does not have 16 bytes is undefined.
 ```
-uint8_t arr[16] = {
-   0x47, 0x18, 0x38, 0x23,
-   0x25, 0x74,
-   0x4b, 0xfd,
-   0xb4, 0x11,
-   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43};
+std::byte arr[16] = {
+   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
+   std::byte{ 0x25 }, std::byte{ 0x74 },
+   std::byte{ 0x4b }, std::byte{ 0xfd },
+   std::byte{ 0xb4 }, std::byte{ 0x11 },
+   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }};
 uuid id(arr);
 ```      
 
@@ -96,12 +95,12 @@ assert(id.wstring() == L"47183823-2574-4bfd-b411-99ed177d3e43");
 Constant and mutable iterators allow direct access to the underlaying `uuid` data. This enables both direct reading and writing of the `uuid` bits.
 
 ```
-std::array<uint8_t, 16> arr{{
-   0x47, 0x18, 0x38, 0x23,
-   0x25, 0x74,
-   0x4b, 0xfd,
-   0xb4, 0x11,
-   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
+std::array<std::byte, 16> arr{{
+   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
+   std::byte{ 0x25 }, std::byte{ 0x74 },
+   std::byte{ 0x4b }, std::byte{ 0xfd },
+   std::byte{ 0xb4 }, std::byte{ 0x11 },
+   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 } }};
 
 uuid id;
 assert(id.nil());
@@ -121,8 +120,8 @@ Member functions `variant()` and `version()` allows to check the variant type of
 
 ```
 uuid id("47183823-2574-4bfd-b411-99ed177d3e43");
-assert(id.version() == uuids::uuid_version::random_number_based);
-assert(id.variant() == uuids::uuid_variant::rfc);
+assert(id.version() == uuid_version::random_number_based);
+assert(id.variant() == uuid_variant::rfc);
 ```
 
 ### Swapping
@@ -165,10 +164,10 @@ assert(empty != id);
 Although it does not make sense to check whether a uuid is less or less or equal then another uuid, the overloading of this operator for `uuid` is necessary in order to be able to store `uuid` values in some containers such as `std::set` that by default use the operator to compare keys.
 
 ```
-std::set<uuids::uuid> ids{
+std::set<std::uuid> ids{
    uuid{},
-   uuids::uuid("47183823-2574-4bfd-b411-99ed177d3e43"),
-   uuids::make_uuid()
+   uuid("47183823-2574-4bfd-b411-99ed177d3e43"),
+   make_uuid()
 };
 
 assert(ids.size() == 3);
@@ -180,10 +179,10 @@ assert(ids.find(uuid{}) != ids.end());
 A `std::hash<>` specialization for `uuid` is provided in order to enable the use of `uuid`s in associative unordered containers such as `std::unordered_set`.
 
 ```
-std::unordered_set<uuids::uuid> ids{
+std::unordered_set<uuid> ids{
    uuid{},
-   uuids::uuid("47183823-2574-4bfd-b411-99ed177d3e43"),
-   uuids::make_uuid()
+   uuid("47183823-2574-4bfd-b411-99ed177d3e43"),
+   make_uuid()
 };
 
 assert(ids.size() == 3);
@@ -197,8 +196,8 @@ Non-member `make_uuid` function creates a new uuid by relying on the operating s
 ```
 auto id = make_uuid();
 assert(!id.nil());
-assert(id.version() == uuids::uuid_version::random_number_based);
-assert(id.variant() == uuids::uuid_variant::rfc);
+assert(id.version() == uuid_version::random_number_based);
+assert(id.variant() == uuid_variant::rfc);
 ```
 
 ## IV. Technical Specifications
@@ -209,7 +208,7 @@ Add a new header called `<uuid>`.
 ### `uuid_variant` enum
 
 ```
-namespace std::uuid {
+namespace std {
    enum class uuid_variant
    {
       ncs,
@@ -223,7 +222,7 @@ namespace std::uuid {
 ### `uuid_version` enum
 
 ```
-namespace std::uuid {
+namespace std {
    enum class uuid_version
    {
       none = 0,
@@ -239,59 +238,60 @@ namespace std::uuid {
 ### `uuid` class
 
 ```
-namespace std::uuid {
+namespace std {
 struct uuid
-   {
-   public:
-      typedef uint8_t         value_type;
-      typedef uint8_t&        reference;
-      typedef uint8_t const&  const_reference;
-      typedef uint8_t*        iterator;
-      typedef uint8_t const*  const_iterator;
-      typedef std::size_t     size_type;
-      typedef std::ptrdiff_t  difference_type;
+{
+public:
+  typedef std::byte          value_type;
+  typedef std::byte&         reference;
+  typedef std::byte const&   const_reference;
+  typedef std::byte*         iterator;
+  typedef std::byte const*   const_iterator;
+  typedef std::size_t        size_type;
+  typedef std::ptrdiff_t     difference_type;
 
-   public:
-      constexpr explicit uuid();
-      constexpr explicit uuid(std::array<uint8_t, 16> const & bytes);
-      explicit uuid(uint8_t const * const bytes);
-      explicit uuid(std::string const & str);
-      explicit uuid(std::wstring const & str);
+public:
+  constexpr uuid() noexcept;
 
-      constexpr uuid_variant variant() const noexcept;
-      constexpr uuid_version version() const noexcept;
-      constexpr std::size_t size() const noexcept;
-      constexpr bool nil() const noexcept;
+  template<typename ForwardIterator>
+  explicit uuid(ForwardIterator first, ForwardIterator last);
 
-      void swap(uuid & other) noexcept;
-      friend void swap(uuid& lhs, uuid& rhs) noexcept;
-      
-      iterator begin() noexcept;
-      const_iterator begin() const noexcept;
-      iterator end() noexcept;
-      const_iterator end() const noexcept;
+  explicit uuid(std::string_view str);
+  explicit uuid(std::wstring_view str);
 
-      template<class CharT, 
-         class Traits = std::char_traits<CharT>,
-         class Alloc = std::allocator<CharT>>
-         std::basic_string<CharT, Traits, Alloc> string(Alloc const & a = Alloc()) const;
-      std::string string() const;
-      std::wstring wstring() const;
+  constexpr uuid_variant variant() const noexcept;
+  constexpr uuid_version version() const noexcept;
+  constexpr std::size_t size() const noexcept;
+  constexpr bool nil() const noexcept;
 
-   private:
-      friend bool operator==(uuid const & lhs, uuid const & rhs) noexcept;
-      friend bool operator<(uuid const & lhs, uuid const & rhs) noexcept;
-      
-      template <class Elem, class Traits>
-      friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);
-   };
-}
+  void swap(uuid & other) noexcept;
+  friend void swap(uuid& lhs, uuid& rhs) noexcept;
+
+  iterator begin() noexcept;
+  const_iterator begin() const noexcept;
+  iterator end() noexcept;
+  const_iterator end() const noexcept;
+
+  template<class CharT, 
+     class Traits = std::char_traits<CharT>,
+     class Alloc = std::allocator<CharT>>
+  std::basic_string<CharT, Traits, Alloc> string(Alloc const & a = Alloc()) const;
+  std::string string() const;
+  std::wstring wstring() const;
+
+private:
+  friend bool operator==(uuid const & lhs, uuid const & rhs) noexcept;
+  friend bool operator<(uuid const & lhs, uuid const & rhs) noexcept;
+
+  template <class Elem, class Traits>
+  friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);
+};
 ```
 
 ### non-member functions
 
 ```
-namespace std::uuid {
+namespace std {
    inline bool operator== (uuid const& lhs, uuid const& rhs) noexcept;
    inline bool operator!= (uuid const& lhs, uuid const& rhs) noexcept;
    inline bool operator< (uuid const& lhs, uuid const& rhs) noexcept;
@@ -306,15 +306,14 @@ namespace std::uuid {
 ### Specialization
 
 ```
-namespace std
-{
+namespace std {
    template <>
-   void swap(uuids::uuid & lhs, uuids::uuid & rhs);
+   void swap(uuid & lhs, uuid & rhs);
 
    template <>
-   struct hash<uuids::uuid>
+   struct hash<uuid>
    {
-      typedef uuids::uuid argument_type;
+      typedef uuid argument_type;
       typedef std::size_t result_type;
 
       result_type operator()(argument_type const &uuid) const;
