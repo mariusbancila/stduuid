@@ -40,14 +40,14 @@ namespace
 
 namespace uuids
 {
-   uuid::uuid(std::string const & str)
+   uuid::uuid(std::string_view str)
    {
-      create(str.c_str(), str.size());
+      create(str.data(), str.size());
    }
 
-   uuid::uuid(std::wstring const & str)
+   uuid::uuid(std::wstring_view str)
    {
-      create(str.c_str(), str.size());
+      create(str.data(), str.size());
    }
 
    template <typename TChar>
@@ -63,7 +63,7 @@ namespace uuids
 
          if (index >= 16 || !is_hex(str[i]))
          {
-            std::fill(std::begin(data), std::end(data), 0);
+            std::fill(std::begin(data), std::end(data), std::byte{ 0 });
             return;
          }
 
@@ -74,14 +74,14 @@ namespace uuids
          }
          else
          {
-            data[index++] = hexpair2char(digit, str[i]);
+            data[index++] = std::byte{ hexpair2char(digit, str[i]) };
             firstdigit = true;
          }
       }
 
       if (index < 16)
       {
-         std::fill(std::begin(data), std::end(data), 0);
+         std::fill(std::begin(data), std::end(data), std::byte{ 0 });
       }
    }
 
@@ -92,62 +92,83 @@ namespace uuids
       GUID newId;
       ::CoCreateGuid(&newId);
 
-      std::array<unsigned char, 16> bytes =
+      std::array<std::byte, 16> bytes =
       {{
-         (unsigned char)((newId.Data1 >> 24) & 0xFF),
-         (unsigned char)((newId.Data1 >> 16) & 0xFF),
-         (unsigned char)((newId.Data1 >> 8) & 0xFF),
-         (unsigned char)((newId.Data1) & 0xff),
+         std::byte{ (unsigned char)((newId.Data1 >> 24) & 0xFF) },
+         std::byte{ (unsigned char)((newId.Data1 >> 16) & 0xFF) },
+         std::byte{ (unsigned char)((newId.Data1 >> 8) & 0xFF) },
+         std::byte{ (unsigned char)((newId.Data1) & 0xFF) },
 
-         (unsigned char)((newId.Data2 >> 8) & 0xFF),
-         (unsigned char)((newId.Data2) & 0xff),
+         std::byte{ (unsigned char)((newId.Data2 >> 8) & 0xFF) },
+         std::byte{ (unsigned char)((newId.Data2) & 0xFF) },
 
-         (unsigned char)((newId.Data3 >> 8) & 0xFF),
-         (unsigned char)((newId.Data3) & 0xFF),
+         std::byte{ (unsigned char)((newId.Data3 >> 8) & 0xFF) },
+         std::byte{ (unsigned char)((newId.Data3) & 0xFF) },
 
-         (unsigned char)newId.Data4[0],
-         (unsigned char)newId.Data4[1],
-         (unsigned char)newId.Data4[2],
-         (unsigned char)newId.Data4[3],
-         (unsigned char)newId.Data4[4],
-         (unsigned char)newId.Data4[5],
-         (unsigned char)newId.Data4[6],
-         (unsigned char)newId.Data4[7]
+         std::byte{ newId.Data4[0] },
+         std::byte{ newId.Data4[1] },
+         std::byte{ newId.Data4[2] },
+         std::byte{ newId.Data4[3] },
+         std::byte{ newId.Data4[4] },
+         std::byte{ newId.Data4[5] },
+         std::byte{ newId.Data4[6] },
+         std::byte{ newId.Data4[7] }
       }};
 
-      return uuid{ bytes };
+      return uuid{ std::begin(bytes), std::end(bytes) };
 
 #elif defined(__linux__) || defined(__unix__)
 
       uuid_t id;
       uuid_generate(id);
-      return uuid{ id };
+
+      std::array<std::byte, 16> bytes =
+      { {
+            std::byte{ id[0] },
+            std::byte{ id[1] },
+            std::byte{ id[2] },
+            std::byte{ id[3] },
+            std::byte{ id[4] },
+            std::byte{ id[5] },
+            std::byte{ id[6] },
+            std::byte{ id[7] },
+            std::byte{ id[8] },
+            std::byte{ id[9] },
+            std::byte{ id[10] },
+            std::byte{ id[11] },
+            std::byte{ id[12] },
+            std::byte{ id[13] },
+            std::byte{ id[14] },
+            std::byte{ id[15] }
+         }};
+
+      return uuid { std::begin(bytes), std::end(bytes) };
 
 #elif defined(__APPLE__)
       auto newId = CFUUIDCreate(NULL);
       auto bytes = CFUUIDGetUUIDBytes(newId);
       CFRelease(newId);
 
-      std::array<unsigned char, 16> byteArray =
+      std::array<std::byte, 16> bytes =
       {{
-         bytes.byte0,
-         bytes.byte1,
-         bytes.byte2,
-         bytes.byte3,
-         bytes.byte4,
-         bytes.byte5,
-         bytes.byte6,
-         bytes.byte7,
-         bytes.byte8,
-         bytes.byte9,
-         bytes.byte10,
-         bytes.byte11,
-         bytes.byte12,
-         bytes.byte13,
-         bytes.byte14,
-         bytes.byte15
+            std::byte{ bytes.byte0 },
+            std::byte{ bytes.byte1 },
+            std::byte{ bytes.byte2 },
+            std::byte{ bytes.byte3 },
+            std::byte{ bytes.byte4 },
+            std::byte{ bytes.byte5 },
+            std::byte{ bytes.byte6 },
+            std::byte{ bytes.byte7 },
+            std::byte{ bytes.byte8 },
+            std::byte{ bytes.byte9 },
+            std::byte{ bytes.byte10 },
+            std::byte{ bytes.byte11 },
+            std::byte{ bytes.byte12 },
+            std::byte{ bytes.byte13 },
+            std::byte{ bytes.byte14 },
+            std::byte{ bytes.byte15 }
       }};
-      return uuid{ byteArray };
+      return uuid{ std::begin(bytes), std::end(bytes) };
 #elif
       return uuid{};
 #endif

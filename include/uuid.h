@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <array>
 #include <string_view>
+#include <iterator>
 
 namespace uuids
 {
@@ -71,32 +72,34 @@ namespace uuids
    struct uuid
    {
    public:
-      typedef uint8_t         value_type;
-      typedef uint8_t&        reference;
-      typedef uint8_t const&  const_reference;
-      typedef uint8_t*        iterator;
-      typedef uint8_t const*  const_iterator;
-      typedef std::size_t     size_type;
-      typedef std::ptrdiff_t  difference_type;
+      typedef std::byte          value_type;
+      typedef std::byte&         reference;
+      typedef std::byte const&   const_reference;
+      typedef std::byte*         iterator;
+      typedef std::byte const*   const_iterator;
+      typedef std::size_t        size_type;
+      typedef std::ptrdiff_t     difference_type;
 
    public:
-      constexpr explicit uuid() {}
-      constexpr explicit uuid(std::array<uint8_t, 16> const & bytes) :data{bytes} {}
-      explicit uuid(uint8_t const * const bytes)
+      constexpr uuid() noexcept {}
+
+      template<typename ForwardIterator>
+      explicit uuid(ForwardIterator first, ForwardIterator last)
       {
-         std::copy(bytes, bytes + 16, std::begin(data));
+         if (std::distance(first, last) == 16)
+            std::copy(first, last, std::begin(data));
       }
 
-      explicit uuid(std::string const & str);
-      explicit uuid(std::wstring const & str);
+      explicit uuid(std::string_view str);
+      explicit uuid(std::wstring_view str);
 
       constexpr uuid_variant variant() const noexcept
       {
-         if ((data[8] & 0x80) == 0x00)
+         if ((data[8] & std::byte{ 0x80 }) == std::byte{ 0x00 })
             return uuid_variant::ncs;
-         else if ((data[8] & 0xC0) == 0x80)
+         else if ((data[8] & std::byte{ 0xC0 }) == std::byte{ 0x80 })
             return uuid_variant::rfc;
-         else if ((data[8] & 0xE0) == 0xC0)
+         else if ((data[8] & std::byte{ 0xE0 }) == std::byte{ 0xC0 })
             return uuid_variant::microsoft;
          else
             return uuid_variant::future;
@@ -104,15 +107,15 @@ namespace uuids
 
       constexpr uuid_version version() const noexcept
       {
-         if ((data[6] & 0xF0) == 0x10)
+         if ((data[6] & std::byte{ 0xF0 }) == std::byte{ 0x10 })
             return uuid_version::time_based;
-         else if ((data[6] & 0xF0) == 0x20)
+         else if ((data[6] & std::byte{ 0xF0 }) == std::byte{ 0x20 })
             return uuid_version::dce_security;
-         else if ((data[6] & 0xF0) == 0x30)
+         else if ((data[6] & std::byte{ 0xF0 }) == std::byte{ 0x30 })
             return uuid_version::name_based_md5;
-         else if ((data[6] & 0xF0) == 0x40)
+         else if ((data[6] & std::byte{ 0xF0 }) == std::byte{ 0x40 })
             return uuid_version::random_number_based;
-         else if ((data[6] & 0xF0) == 0x50)
+         else if ((data[6] & std::byte{ 0xF0 }) == std::byte{ 0x50 })
             return uuid_version::name_based_sha1;
          else
             return uuid_version::none;
@@ -122,7 +125,7 @@ namespace uuids
 
       constexpr bool nil() const noexcept
       {
-         for (size_t i = 0; i < data.size(); ++i) if (data[i] != 0) return false;
+         for (size_t i = 0; i < data.size(); ++i) if (data[i] != std::byte{ 0 }) return false;
          return true;
       }
 
@@ -166,7 +169,7 @@ namespace uuids
       }
 
    private:
-      std::array<uint8_t, 16> data{ 0 };
+      std::array<std::byte, 16> data{ { std::byte{0}} };
 
       friend bool operator==(uuid const & lhs, uuid const & rhs) noexcept;
       friend bool operator<(uuid const & lhs, uuid const & rhs) noexcept;
