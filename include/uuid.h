@@ -55,7 +55,7 @@ namespace uuids
       
       // reserved for possible future definition
       // N bit pattern: 111x      
-      future
+      reserved
    };
 
    // indicated by a bit pattern in octet 6, marked with M in xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx
@@ -102,7 +102,7 @@ namespace uuids
          else if ((data[8] & std::byte{ 0xE0 }) == std::byte{ 0xC0 })
             return uuid_variant::microsoft;
          else
-            return uuid_variant::future;
+            return uuid_variant::reserved;
       }
 
       constexpr uuid_version version() const noexcept
