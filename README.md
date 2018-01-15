@@ -1,5 +1,5 @@
 # stduuid
-A C++ cross-platform implementation **for universally unique identifiers**, simply know as either UUID or GUID (mostly on Windows). A UUID is a 128-bit number used to uniquely identify information in computer systems, such as database table keys, COM interfaces, classes and type libraries, and many others.
+A C++ cross-platform single-header library implementation **for universally unique identifiers**, simply know as either UUID or GUID (mostly on Windows). A UUID is a 128-bit number used to uniquely identify information in computer systems, such as database table keys, COM interfaces, classes and type libraries, and many others.
 
 For information about UUID/GUIDs see:
 * [Universally unique identifier](https://en.wikipedia.org/wiki/Universally_unique_identifier)
@@ -7,16 +7,39 @@ For information about UUID/GUIDs see:
 
 ## Library overview
 The library defines a namespace `uuids` with the following types and functions:
-* `uuid` is a class representing a UUID; this can be default constructed (a nil UUID), constructed from an array of bytes, or from a string.
-sentation (in lowercase)
-* `uuid_variant` is a strongly type enum representing the type of a UUID
-* `uuid_version` is a strongly type enum representing the version of a UUID
-* `make_uuid` is a parameterless function that creates a new UUID using the typical platform-specific method to create one (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac).
-* `operator==` and `operator!=` for UUIDs comparison for equality/inequality
-* `operator<` for comparing whether one UUIDs is less than another. Although this operation does not make much logical sense, it is necessary in order to store UUIDs in a std::set.
-* `operator<<` to write a UUID to an output string using the standard repre
-* `std::swap<>` specialization for `uuid`
-* `std::hash<>` specialization for `uuid`, necessary for storing UUIDs in unordered associative containers, such as `std::unordered_set`
+
+Basic types:
+
+| Name | Description |
+| ---- | ----------- |
+| `uuid` | a class representing a UUID; this can be default constructed (a nil UUID), constructed from a range (defined by a pair of iterators), or from a string. |
+| `uuid_variant` | a strongly type enum representing the type of a UUID |
+| `uuid_version` | a strongly type enum representing the version of a UUID |
+
+Generators:
+
+| Name | Description | 
+| ---- | ----------- |
+| `uuid_default_generator` | a function object that generates new UUIDs, using an operating system method to create one (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac) |
+| ` basic_uuid_random_generator` | a function object that generates version 4 UUIDs using a pseudo-random number generator engine. |
+| `uuid_random_generator` | a basic_uuid_random_generator using the Marsenne Twister engine, i.e. `basic_uuid_random_generator<std::mt19937>` |
+
+Utilities:
+
+| Name | Description | 
+| ---- | ----------- |
+| `std::swap<>` | specialization of `swap` for `uuid` |
+| `std::hash<>` | specialization of `hash` for `uuid` (necessary for storing UUIDs in unordered associative containers, such as `std::unordered_set`) |
+
+Other:
+
+| Name | Description | 
+| ---- | ----------- |
+| `operator==` and `operator!=` | for UUIDs comparison for equality/inequality |
+| `operator<` | for comparing whether one UUIDs is less than another. Although this operation does not make much logical sense, it is necessary in order to store UUIDs in a std::set. |
+| `operator<<` | to write a UUID to an output stream using the canonical textual representation. |
+| `to_string()` | creates a `std::string` with the canonical textual representation of a UUID. |
+| `to_wstring()` | creates a `std::wstring` with the canonical textual representation of a UUID. |
 
 This project is currently under development and should be ignored until further notice.
 
@@ -30,7 +53,7 @@ assert(empty.size() == 16);
 ```
 * Creating a new UUID
 ```
-uuid const guid = uuids::make_uuid();
+uuid const guid = uuids::uuid_default_generator{}();
 assert(!guid.nil());
 assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::random_number_based);
@@ -52,31 +75,30 @@ assert(guid.wstring() == str);
 ```
 * Creating a UUID from an array
 ```
-std::array<std::byte, 16> arr{{
-   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-   std::byte{ 0x25 }, std::byte{ 0x74 },
-   std::byte{ 0x4b }, std::byte{ 0xfd },
-   std::byte{ 0xb4 }, std::byte{ 0x11 },
-   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
-}};
+std::array<uuids::uuid::value_type, 16> arr{{
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
 uuid guid(std::begin(arr), std::end(arr));
 assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
 ```
 or 
 ```
-std::byte arr[16] = {
-   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-   std::byte{ 0x25 }, std::byte{ 0x74 },
-   std::byte{ 0x4b }, std::byte{ 0xfd },
-   std::byte{ 0xb4 }, std::byte{ 0x11 },
-   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 } };
+uuids::uuid::value_type arr[16] = {
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 };
 uuid guid(std::begin(arr), std::end(arr));
 assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
 ```
 * Comparing UUIDS
 ```
 uuid empty;
-uuid guid = uuids::make_uuid();
+uuid guid = uuids::uuid_default_generator{}();
 
 assert(empty == empty);
 assert(guid == guid);
@@ -85,7 +107,7 @@ assert(empty != guid);
 * Swapping UUIDS
 ```
 uuid empty;
-uuid guid = uuids::make_uuid();
+uuid guid = uuids::uuid_default_generator{}();
 
 assert(empty.nil());
 assert(!guid.nil());
@@ -103,18 +125,17 @@ assert(!guid.nil());
 * Converting to string
 ```
 uuid empty;
-assert(empty.string() == "00000000-0000-0000-0000-000000000000");
-assert(empty.wstring() == L"00000000-0000-0000-0000-000000000000");
+assert(uuids::to_string(empty) == "00000000-0000-0000-0000-000000000000");
+assert(uuids::to_wstring(empty) == L"00000000-0000-0000-0000-000000000000");
 ```
 * Iterating through the UUID data
 ```
-std::array<std::byte, 16> arr{{
-   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-   std::byte{ 0x25 }, std::byte{ 0x74 },
-   std::byte{ 0x4b }, std::byte{ 0xfd },
-   std::byte{ 0xb4 }, std::byte{ 0x11 },
-   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
-}};
+std::array<uuids::uuid::value_type, 16> arr{{
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
 
 uuid guid;
 assert(guid.nil());
@@ -129,26 +150,16 @@ for (auto const & b : guid)
 ```
 * Using with an orderered associative container
 ```
-std::set<uuids::uuid> ids{
-   uuid{},
-   uuids::make_uuid(),
-   uuids::make_uuid(),
-   uuids::make_uuid(),
-   uuids::make_uuid()
-};
+uuids::uuid_default_generator gen;
+std::set<uuids::uuid> ids{uuid{}, gen(), gen(), gen(), gen()};
 
 assert(ids.size() == 5);
 assert(ids.find(uuid{}) != ids.end());
 ```
 * Using in an unordered associative container
 ```
-std::unordered_set<uuids::uuid> ids{
-   uuid{},
-   uuids::make_uuid(),
-   uuids::make_uuid(),
-   uuids::make_uuid(),
-   uuids::make_uuid()
-};
+uuids::uuid_default_generator gen;
+std::unordered_set<uuids::uuid> ids{uuid{}, gen(), gen(), gen(), gen()};
 
 assert(ids.size() == 5);
 assert(ids.find(uuid{}) != ids.end());
