@@ -4,6 +4,7 @@
 #include <set>
 #include <unordered_set>
 #include <random>
+#include <vector>
 
 int main()
 {
@@ -168,17 +169,31 @@ int main()
          0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
       }};
 
-      uuid guid;
-      assert(guid.nil());
-
-      std::copy(std::cbegin(arr), std::cend(arr), std::begin(guid));
-      assert(!guid.nil());
-      assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
-
-      size_t i = 0;
-      for (auto const & b : guid)
       {
-         assert(arr[i++] == b);
+         uuid guid;
+         assert(guid.nil());
+
+         std::copy(std::cbegin(arr), std::cend(arr), std::begin(guid));
+         assert(!guid.nil());
+         assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
+
+         size_t i = 0;
+         for (auto const & b : guid)
+         {
+            assert(arr[i++] == b);
+         }
+      }
+
+      {
+         const uuid guid("47183823-2574-4bfd-b411-99ed177d3e43");
+         assert(!guid.nil());
+         assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
+
+         size_t i = 0;
+         for (auto const & b : guid)
+         {
+            assert(arr[i++] == b);
+         }
       }
    }
 
@@ -191,7 +206,6 @@ int main()
       constexpr uuid_variant variant = empty.variant();
       constexpr uuid_version version = empty.version();
    }
-
 
    {
       std::cout << "Test default generator" << std::endl;

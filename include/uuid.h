@@ -8,6 +8,8 @@
 #include <iterator>
 #include <random>
 #include <memory>
+#include <functional>
+#include <assert.h>
 
 #ifdef _WIN32
 #include <objbase.h>
@@ -81,14 +83,309 @@ namespace uuids
 
    struct uuid
    {
+      struct uuid_const_iterator
+      {
+         typedef uuid_const_iterator               self_type;
+         typedef uint8_t                           value_type;
+         typedef uint8_t const &                   reference;
+         typedef uint8_t const *                   pointer;
+         typedef std::random_access_iterator_tag   iterator_category;
+         typedef ptrdiff_t                         difference_type;
+
+      protected:
+         pointer ptr = nullptr;
+         size_t  index = 0;
+
+         bool compatible(self_type const & other) const noexcept
+         {
+            return ptr == other.ptr;
+         }
+
+      public:
+         explicit uuid_const_iterator(pointer ptr, size_t const index) :
+            ptr(ptr), index(index)
+         {
+         }
+
+         uuid_const_iterator(uuid_const_iterator const & o) = default;
+         uuid_const_iterator& operator=(uuid_const_iterator const & o) = default;
+         ~uuid_const_iterator() = default;
+
+         self_type & operator++ ()
+         {
+            if (index >= uuid::state_size)
+               throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
+            ++index;
+            return *this;
+         }
+
+         self_type operator++ (int)
+         {
+            self_type tmp = *this;
+            ++*this;
+            return tmp;
+         }
+
+         bool operator== (self_type const & other) const
+         {
+            assert(compatible(other));
+            return index == other.index;
+         }
+
+         bool operator!= (self_type const & other) const
+         {
+            return !(*this == other);
+         }
+
+         reference operator* () const
+         {
+            if (ptr == nullptr)
+               throw std::bad_function_call();
+            return *(ptr + index);
+         }
+
+         reference operator-> () const
+         {
+            if (ptr == nullptr)
+               throw std::bad_function_call();
+            return *(ptr + index);
+         }
+
+         uuid_const_iterator() = default;
+
+         self_type & operator--()
+         {
+            if (index <= 0)
+               throw std::out_of_range("Iterator cannot be decremented past the beginning of the data.");
+            --index;
+            return *this;
+         }
+
+         self_type operator--(int)
+         {
+            self_type tmp = *this;
+            --*this;
+            return tmp;
+         }
+
+         self_type operator+(difference_type offset) const
+         {
+            self_type tmp = *this;
+            return tmp += offset;
+         }
+
+         self_type operator-(difference_type offset) const
+         {
+            self_type tmp = *this;
+            return tmp -= offset;
+         }
+
+         difference_type operator-(self_type const & other) const
+         {
+            assert(compatible(other));
+            return (index - other.index);
+         }
+
+         bool operator<(self_type const & other) const
+         {
+            assert(compatible(other));
+            return index < other.index;
+         }
+
+         bool operator>(self_type const & other) const
+         {
+            return other < *this;
+         }
+
+         bool operator<=(self_type const & other) const
+         {
+            return !(other < *this);
+         }
+
+         bool operator>=(self_type const & other) const
+         {
+            return !(*this < other);
+         }
+
+         self_type & operator+=(difference_type const offset)
+         {
+            if (index + offset < 0 || index + offset > uuid::state_size)
+               throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
+
+            index += offset;
+            return *this;
+         }
+
+         self_type & operator-=(difference_type const offset)
+         {
+            return *this += -offset;
+         }
+
+         value_type const & operator[](difference_type const offset) const
+         {
+            return (*(*this + offset));
+         }
+      };
+
+      struct uuid_iterator : public uuid_const_iterator
+      {
+         typedef uuid_iterator                     self_type;
+         typedef uint8_t                           value_type;
+         typedef uint8_t&                          reference;
+         typedef uint8_t*                          pointer;
+         typedef std::random_access_iterator_tag   iterator_category;
+         typedef ptrdiff_t                         difference_type;
+
+      protected:
+         pointer ptr = nullptr;
+         size_t  index = 0;
+
+         bool compatible(self_type const & other) const noexcept
+         {
+            return ptr == other.ptr;
+         }
+
+      public:
+         explicit uuid_iterator(pointer ptr, size_t const index) :
+            ptr(ptr), index(index)
+         {
+         }
+
+         uuid_iterator(uuid_iterator const & o) = default;
+         uuid_iterator& operator=(uuid_iterator const & o) = default;
+         ~uuid_iterator() = default;
+
+         self_type & operator++ ()
+         {
+            if (index >= uuid::state_size)
+               throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
+            ++index;
+            return *this;
+         }
+
+         self_type operator++ (int)
+         {
+            self_type tmp = *this;
+            ++*this;
+            return tmp;
+         }
+
+         bool operator== (self_type const & other) const
+         {
+            assert(compatible(other));
+            return index == other.index;
+         }
+
+         bool operator!= (self_type const & other) const
+         {
+            return !(*this == other);
+         }
+
+         reference operator* () const
+         {
+            if (ptr == nullptr)
+               throw std::bad_function_call();
+            return *(ptr + index);
+         }
+
+         reference operator-> () const
+         {
+            if (ptr == nullptr)
+               throw std::bad_function_call();
+            return *(ptr + index);
+         }
+
+         uuid_iterator() = default;
+
+         self_type & operator--()
+         {
+            if (index <= 0)
+               throw std::out_of_range("Iterator cannot be decremented past the beginning of the data.");
+            --index;
+            return *this;
+         }
+
+         self_type operator--(int)
+         {
+            self_type tmp = *this;
+            --*this;
+            return tmp;
+         }
+
+         self_type operator+(difference_type offset) const
+         {
+            self_type tmp = *this;
+            return tmp += offset;
+         }
+
+         self_type operator-(difference_type offset) const
+         {
+            self_type tmp = *this;
+            return tmp -= offset;
+         }
+
+         difference_type operator-(self_type const & other) const
+         {
+            assert(compatible(other));
+            return (index - other.index);
+         }
+
+         bool operator<(self_type const & other) const
+         {
+            assert(compatible(other));
+            return index < other.index;
+         }
+
+         bool operator>(self_type const & other) const
+         {
+            return other < *this;
+         }
+
+         bool operator<=(self_type const & other) const
+         {
+            return !(other < *this);
+         }
+
+         bool operator>=(self_type const & other) const
+         {
+            return !(*this < other);
+         }
+
+         self_type & operator+=(difference_type const offset)
+         {
+            if (index + offset < 0 || index + offset > uuid::state_size)
+               throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
+
+            index += offset;
+            return *this;
+         }
+
+         self_type & operator-=(difference_type const offset)
+         {
+            return *this += -offset;
+         }
+
+         value_type & operator[](difference_type const offset)
+         {
+            return (*(*this + offset));
+         }
+
+         value_type const & operator[](difference_type const offset) const
+         {
+            return (*(*this + offset));
+         }
+      };
+
    public:
-      typedef uint8_t         value_type;
-      typedef uint8_t&        reference;
-      typedef uint8_t const&  const_reference;
-      typedef uint8_t*        iterator;
-      typedef uint8_t const*  const_iterator;
-      typedef std::size_t     size_type;
-      typedef std::ptrdiff_t  difference_type;
+      typedef uint8_t               value_type;
+      typedef uint8_t&              reference;
+      typedef uint8_t const&        const_reference;
+      typedef uuid_iterator         iterator;
+      typedef uuid_const_iterator   const_iterator;
+      typedef std::size_t           size_type;
+      typedef std::ptrdiff_t        difference_type;
+
+      static constexpr size_t state_size = 16;
 
    public:
       constexpr uuid() noexcept {}
@@ -131,7 +428,7 @@ namespace uuids
             return uuid_version::none;
       }
 
-      constexpr std::size_t size() const noexcept { return 16; }
+      constexpr std::size_t size() const noexcept { return state_size; }
 
       constexpr bool nil() const noexcept
       {
@@ -149,10 +446,10 @@ namespace uuids
          std::swap(lhs.data, rhs.data);
       }
 
-      iterator begin() noexcept { return &data[0]; }
-      const_iterator begin() const noexcept { return &data[0]; }
-      iterator end() noexcept { return &data[0] + size(); }
-      const_iterator end() const noexcept { return &data[0] + size(); }
+      iterator begin() noexcept { return uuid_iterator(&data[0], 0); }
+      const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
+      iterator end() noexcept { return uuid_iterator(&data[0], state_size); }
+      const_iterator end() const noexcept { return uuid_const_iterator(&data[0], state_size); }
 
    private:
       std::array<uint8_t, 16> data{ { 0 } };
