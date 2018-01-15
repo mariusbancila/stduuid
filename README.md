@@ -59,6 +59,27 @@ assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::random_number_based);
 assert(guid.variant() == uuids::uuid_variant::rfc);
 ```
+* Creating a new UUID with a default random generator
+```
+uuids::uuid_random_generator gen;
+uuid const guid = gen();
+assert(!guid.nil());
+assert(guid.size() == 16);
+assert(guid.version() == uuids::uuid_version::random_number_based);
+assert(guid.variant() == uuids::uuid_variant::rfc);
+```
+* Creating a new UUID with a particular random generator
+```
+std::random_device rd;
+std::ranlux48_base generator(rd());
+uuids::basic_uuid_random_generator<std::ranlux48_base> gen(&generator);
+
+uuid const guid = gen();
+assert(!guid.nil());
+assert(guid.size() == 16);
+assert(guid.version() == uuids::uuid_version::random_number_based);
+assert(guid.variant() == uuids::uuid_variant::rfc);
+```
 * Create a UUID from a string
 ```
 using namespace std::string_literals;
