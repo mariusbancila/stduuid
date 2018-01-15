@@ -63,7 +63,7 @@ namespace uuids
 
          if (index >= 16 || !is_hex(str[i]))
          {
-            std::fill(std::begin(data), std::end(data), std::byte{ 0 });
+            std::fill(std::begin(data), std::end(data), 0);
             return;
          }
 
@@ -74,14 +74,14 @@ namespace uuids
          }
          else
          {
-            data[index++] = std::byte{ hexpair2char(digit, str[i]) };
+            data[index++] = hexpair2char(digit, str[i]);
             firstdigit = true;
          }
       }
 
       if (index < 16)
       {
-         std::fill(std::begin(data), std::end(data), std::byte{ 0 });
+         std::fill(std::begin(data), std::end(data), 0);
       }
    }
 
@@ -92,27 +92,27 @@ namespace uuids
       GUID newId;
       ::CoCreateGuid(&newId);
 
-      std::array<std::byte, 16> bytes =
+      std::array<uint8_t, 16> bytes =
       {{
-         std::byte{ (unsigned char)((newId.Data1 >> 24) & 0xFF) },
-         std::byte{ (unsigned char)((newId.Data1 >> 16) & 0xFF) },
-         std::byte{ (unsigned char)((newId.Data1 >> 8) & 0xFF) },
-         std::byte{ (unsigned char)((newId.Data1) & 0xFF) },
+         (unsigned char)((newId.Data1 >> 24) & 0xFF),
+         (unsigned char)((newId.Data1 >> 16) & 0xFF),
+         (unsigned char)((newId.Data1 >> 8) & 0xFF),
+         (unsigned char)((newId.Data1) & 0xFF),
 
-         std::byte{ (unsigned char)((newId.Data2 >> 8) & 0xFF) },
-         std::byte{ (unsigned char)((newId.Data2) & 0xFF) },
+         (unsigned char)((newId.Data2 >> 8) & 0xFF),
+         (unsigned char)((newId.Data2) & 0xFF),
 
-         std::byte{ (unsigned char)((newId.Data3 >> 8) & 0xFF) },
-         std::byte{ (unsigned char)((newId.Data3) & 0xFF) },
+         (unsigned char)((newId.Data3 >> 8) & 0xFF),
+         (unsigned char)((newId.Data3) & 0xFF),
 
-         std::byte{ newId.Data4[0] },
-         std::byte{ newId.Data4[1] },
-         std::byte{ newId.Data4[2] },
-         std::byte{ newId.Data4[3] },
-         std::byte{ newId.Data4[4] },
-         std::byte{ newId.Data4[5] },
-         std::byte{ newId.Data4[6] },
-         std::byte{ newId.Data4[7] }
+         newId.Data4[0],
+         newId.Data4[1],
+         newId.Data4[2],
+         newId.Data4[3],
+         newId.Data4[4],
+         newId.Data4[5],
+         newId.Data4[6],
+         newId.Data4[7]
       }};
 
       return uuid{ std::begin(bytes), std::end(bytes) };
@@ -122,24 +122,24 @@ namespace uuids
       uuid_t id;
       uuid_generate(id);
 
-      std::array<std::byte, 16> bytes =
+      std::array<uint8_t, 16> bytes =
       { {
-            std::byte{ id[0] },
-            std::byte{ id[1] },
-            std::byte{ id[2] },
-            std::byte{ id[3] },
-            std::byte{ id[4] },
-            std::byte{ id[5] },
-            std::byte{ id[6] },
-            std::byte{ id[7] },
-            std::byte{ id[8] },
-            std::byte{ id[9] },
-            std::byte{ id[10] },
-            std::byte{ id[11] },
-            std::byte{ id[12] },
-            std::byte{ id[13] },
-            std::byte{ id[14] },
-            std::byte{ id[15] }
+            id[0],
+            id[1],
+            id[2],
+            id[3],
+            id[4],
+            id[5],
+            id[6],
+            id[7],
+            id[8],
+            id[9],
+            id[10],
+            id[11],
+            id[12],
+            id[13],
+            id[14],
+            id[15]
          }};
 
       return uuid { std::begin(bytes), std::end(bytes) };
@@ -149,24 +149,24 @@ namespace uuids
       auto bytes = CFUUIDGetUUIDBytes(newId);
       CFRelease(newId);
 
-      std::array<std::byte, 16> bytes =
+      std::array<uint8_t, 16> bytes =
       {{
-            std::byte{ bytes.byte0 },
-            std::byte{ bytes.byte1 },
-            std::byte{ bytes.byte2 },
-            std::byte{ bytes.byte3 },
-            std::byte{ bytes.byte4 },
-            std::byte{ bytes.byte5 },
-            std::byte{ bytes.byte6 },
-            std::byte{ bytes.byte7 },
-            std::byte{ bytes.byte8 },
-            std::byte{ bytes.byte9 },
-            std::byte{ bytes.byte10 },
-            std::byte{ bytes.byte11 },
-            std::byte{ bytes.byte12 },
-            std::byte{ bytes.byte13 },
-            std::byte{ bytes.byte14 },
-            std::byte{ bytes.byte15 }
+            bytes.byte0,
+            bytes.byte1,
+            bytes.byte2,
+            bytes.byte3,
+            bytes.byte4,
+            bytes.byte5,
+            bytes.byte6,
+            bytes.byte7,
+            bytes.byte8,
+            bytes.byte9,
+            bytes.byte10,
+            bytes.byte11,
+            bytes.byte12,
+            bytes.byte13,
+            bytes.byte14,
+            bytes.byte15
       }};
       return uuid{ std::begin(bytes), std::end(bytes) };
 #elif

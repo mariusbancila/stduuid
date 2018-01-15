@@ -3,6 +3,7 @@
 #include <iostream>
 #include <set>
 #include <unordered_set>
+#include <random>
 
 int main()
 {
@@ -50,26 +51,24 @@ int main()
       using namespace std::string_literals;
 
       {
-         std::array<std::byte, 16> arr{ {
-            std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-            std::byte{ 0x25 }, std::byte{ 0x74 },
-            std::byte{ 0x4b }, std::byte{ 0xfd },
-            std::byte{ 0xb4 }, std::byte{ 0x11 },
-            std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
-         } };
+         std::array<uint8_t, 16> arr{ {
+               0x47, 0x18, 0x38, 0x23,
+               0x25, 0x74,
+               0x4b, 0xfd,
+               0xb4, 0x11,
+               0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43} };
 
          uuid guid(std::begin(arr), std::end(arr));
          assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
       }
 
       {
-         std::byte arr[16] = {
-            std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-            std::byte{ 0x25 }, std::byte{ 0x74 },
-            std::byte{ 0x4b }, std::byte{ 0xfd },
-            std::byte{ 0xb4 }, std::byte{ 0x11 },
-            std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
-         };
+         uint8_t arr[16] = {
+            0x47, 0x18, 0x38, 0x23,
+            0x25, 0x74,
+            0x4b, 0xfd,
+            0xb4, 0x11,
+            0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 };
 
          uuid guid(std::begin(arr), std::end(arr));
          assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
@@ -171,12 +170,12 @@ int main()
    {
       std::cout << "Test iterators" << std::endl;
 
-      std::array<std::byte, 16> arr{{
-         std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-         std::byte{ 0x25 }, std::byte{ 0x74 },
-         std::byte{ 0x4b }, std::byte{ 0xfd },
-         std::byte{ 0xb4 }, std::byte{ 0x11 },
-         std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }
+      std::array<uint8_t, 16> arr{{
+         0x47, 0x18, 0x38, 0x23,
+         0x25, 0x74,
+         0x4b, 0xfd,
+         0xb4, 0x11,
+         0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
       }};
 
       uuid guid;
@@ -201,6 +200,20 @@ int main()
       constexpr size_t size = empty.size();
       constexpr uuid_variant variant = empty.variant();
       constexpr uuid_version version = empty.version();
+   }
+
+   {
+      auto id1 = make_uuid();
+
+      uuid_default_generator dgen;
+      auto id2 = make_uuid(dgen);
+      auto id3 = make_uuid(dgen);
+
+      std::random_device rd;
+      std::mt19937 mtgen(rd());
+      uuid_random_generator<std::mt19937> rgen(mtgen);
+      auto id4 = make_uuid(rgen);
+      auto id5 = make_uuid(rgen);
    }
 
    std::cout << "ALL PASSED" << std::endl;
