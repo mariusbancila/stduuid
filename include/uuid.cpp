@@ -85,7 +85,7 @@ namespace uuids
       }
    }
 
-   uuid make_uuid()
+   uuid uuid_default_generator::operator()()
    {
 #ifdef _WIN32
 

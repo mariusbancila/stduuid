@@ -6,6 +6,7 @@
 #include <array>
 #include <string_view>
 #include <iterator>
+#include <random>
 
 namespace uuids
 {
@@ -227,29 +228,26 @@ namespace uuids
    public:
       typedef uuid result_type;
 
-      uuid operator()() { return uuid{}; }
+      uuid operator()();
    };
 
    template <typename UniformRandomNumberGenerator>
-   class uuid_random_generator 
+   class basic_uuid_random_generator 
    {
    public:
       typedef uuid result_type;
 
-      uuid_random_generator() {}
-      explicit uuid_random_generator(UniformRandomNumberGenerator& gen) {}
-      explicit uuid_random_generator(UniformRandomNumberGenerator* pGen) {}
+      basic_uuid_random_generator() {}
+      explicit basic_uuid_random_generator(UniformRandomNumberGenerator& gen) {}
+      explicit basic_uuid_random_generator(UniformRandomNumberGenerator* pGen) {}
 
       uuid operator()() { return uuid{}; }
+
+   private:
+
    };
 
-   uuid make_uuid();
-
-   template <typename Generator>
-   uuid make_uuid(Generator & g) 
-   {
-      return g();
-   }
+   using uuid_random_generator = basic_uuid_random_generator<std::mt19937>;
 }
 
 namespace std

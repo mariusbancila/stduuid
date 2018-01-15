@@ -76,9 +76,9 @@ int main()
    }
 
    {
-      std::cout << "Test make" << std::endl;
+      std::cout << "Test default generator" << std::endl;
 
-      uuid const guid = uuids::make_uuid();
+      uuid const guid = uuids::uuid_default_generator{}();
       assert(!guid.nil());
       assert(guid.size() == 16);
       assert(guid.version() == uuids::uuid_version::random_number_based);
@@ -89,7 +89,7 @@ int main()
       std::cout << "Test equality" << std::endl;
 
       uuid empty;
-      uuid guid = uuids::make_uuid();
+      uuid guid = uuids::uuid_default_generator{}();
 
       assert(empty == empty);
       assert(guid == guid);
@@ -100,16 +100,16 @@ int main()
       std::cout << "Test comparison" << std::endl;
 
       auto empty = uuid{};
-      auto id = make_uuid();
+      auto id = uuids::uuid_default_generator{}();
 
       assert(empty < id);
 
       std::set<uuids::uuid> ids{
          uuid{},
-         uuids::make_uuid(),
-         uuids::make_uuid(),
-         uuids::make_uuid(),
-         uuids::make_uuid()
+         uuids::uuid_default_generator{}(),
+         uuids::uuid_default_generator{}(),
+         uuids::uuid_default_generator{}(),
+         uuids::uuid_default_generator{}()
       };
 
       assert(ids.size() == 5);
@@ -129,10 +129,10 @@ int main()
 
       std::unordered_set<uuids::uuid> ids{
          uuid{},
-         uuids::make_uuid(),
-         uuids::make_uuid(),
-         uuids::make_uuid(),
-         uuids::make_uuid()
+         uuids::uuid_default_generator{}(),
+         uuids::uuid_default_generator{}(),
+         uuids::uuid_default_generator{}(),
+         uuids::uuid_default_generator{}()
       };
 
       assert(ids.size() == 5);
@@ -143,7 +143,7 @@ int main()
       std::cout << "Test swap" << std::endl;
 
       uuid empty;
-      uuid guid = uuids::make_uuid();
+      uuid guid = uuids::uuid_default_generator{}();
 
       assert(empty.nil());
       assert(!guid.nil());
@@ -202,7 +202,7 @@ int main()
       constexpr uuid_version version = empty.version();
    }
 
-   {
+   {/*
       auto id1 = make_uuid();
 
       uuid_default_generator dgen;
@@ -214,7 +214,7 @@ int main()
       uuid_random_generator<std::mt19937> rgen(mtgen);
       auto id4 = make_uuid(rgen);
       auto id5 = make_uuid(rgen);
-   }
+   */}
 
    std::cout << "ALL PASSED" << std::endl;
 
