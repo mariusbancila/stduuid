@@ -7,6 +7,15 @@
 #include <string_view>
 #include <iterator>
 #include <random>
+#include <memory>
+
+#ifdef _WIN32
+#include <objbase.h>
+#elif defined(__linux__) || defined(__unix__)
+#include <uuid/uuid.h>
+#elif defined(__APPLE__)
+#include <CoreFoundation/CFUUID.h>
+#endif
 
 namespace uuids
 {
@@ -145,30 +154,6 @@ namespace uuids
       iterator end() noexcept { return &data[0] + size(); }
       const_iterator end() const noexcept { return &data[0] + size(); }
 
-      template<class CharT, 
-         class Traits = std::char_traits<CharT>,
-         class Alloc = std::allocator<CharT>>
-         std::basic_string<CharT, Traits, Alloc> string(Alloc const & a = Alloc()) const
-      {
-         std::basic_stringstream<CharT, Traits, Alloc>  sstr;
-         sstr << *this;
-         return sstr.str();
-      }
-
-      std::string string() const
-      {
-         std::stringstream sstr;
-         sstr << *this;
-         return sstr.str();
-      }
-
-      std::wstring wstring() const
-      {
-         std::wstringstream sstr;
-         sstr << *this;
-         return sstr.str();
-      }
-
    private:
       std::array<uint8_t, 16> data{ { 0 } };
 
@@ -223,12 +208,113 @@ namespace uuids
          << std::setw(2) << (int)id.data[15];
    }
 
+   std::string to_string(uuid const & id)
+   {
+      std::stringstream sstr;
+      sstr << id;
+      return sstr.str();
+   }
+
+   std::wstring to_wstring(uuid const & id)
+   {
+      std::wstringstream sstr;
+      sstr << id;
+      return sstr.str();
+   }
+
    class uuid_default_generator
    {
    public:
       typedef uuid result_type;
 
-      uuid operator()();
+      uuid operator()()
+      {
+#ifdef _WIN32
+
+         GUID newId;
+         ::CoCreateGuid(&newId);
+
+         std::array<uint8_t, 16> bytes =
+         { {
+               (unsigned char)((newId.Data1 >> 24) & 0xFF),
+               (unsigned char)((newId.Data1 >> 16) & 0xFF),
+               (unsigned char)((newId.Data1 >> 8) & 0xFF),
+               (unsigned char)((newId.Data1) & 0xFF),
+
+               (unsigned char)((newId.Data2 >> 8) & 0xFF),
+               (unsigned char)((newId.Data2) & 0xFF),
+
+               (unsigned char)((newId.Data3 >> 8) & 0xFF),
+               (unsigned char)((newId.Data3) & 0xFF),
+
+               newId.Data4[0],
+               newId.Data4[1],
+               newId.Data4[2],
+               newId.Data4[3],
+               newId.Data4[4],
+               newId.Data4[5],
+               newId.Data4[6],
+               newId.Data4[7]
+            } };
+
+         return uuid{ std::begin(bytes), std::end(bytes) };
+
+#elif defined(__linux__) || defined(__unix__)
+
+         uuid_t id;
+         uuid_generate(id);
+
+         std::array<uint8_t, 16> bytes =
+         { {
+               id[0],
+               id[1],
+               id[2],
+               id[3],
+               id[4],
+               id[5],
+               id[6],
+               id[7],
+               id[8],
+               id[9],
+               id[10],
+               id[11],
+               id[12],
+               id[13],
+               id[14],
+               id[15]
+            } };
+
+         return uuid{ std::begin(bytes), std::end(bytes) };
+
+#elif defined(__APPLE__)
+         auto newId = CFUUIDCreate(NULL);
+         auto bytes = CFUUIDGetUUIDBytes(newId);
+         CFRelease(newId);
+
+         std::array<uint8_t, 16> bytes =
+         { {
+               bytes.byte0,
+               bytes.byte1,
+               bytes.byte2,
+               bytes.byte3,
+               bytes.byte4,
+               bytes.byte5,
+               bytes.byte6,
+               bytes.byte7,
+               bytes.byte8,
+               bytes.byte9,
+               bytes.byte10,
+               bytes.byte11,
+               bytes.byte12,
+               bytes.byte13,
+               bytes.byte14,
+               bytes.byte15
+            } };
+         return uuid{ std::begin(bytes), std::end(bytes) };
+#elif
+         return uuid{};
+#endif
+      }
    };
 
    template <typename UniformRandomNumberGenerator>
@@ -237,23 +323,125 @@ namespace uuids
    public:
       typedef uuid result_type;
 
-      basic_uuid_random_generator() {}
-      explicit basic_uuid_random_generator(UniformRandomNumberGenerator& gen) {}
-      explicit basic_uuid_random_generator(UniformRandomNumberGenerator* pGen) {}
+      basic_uuid_random_generator()
+         :generator(new UniformRandomNumberGenerator)
+      {
+         std::random_device rd;
+         generator->seed(rd());
+      }
 
-      uuid operator()() { return uuid{}; }
+      explicit basic_uuid_random_generator(UniformRandomNumberGenerator& gen) :
+         generator(&gen, [](auto) {}) {}
+      explicit basic_uuid_random_generator(UniformRandomNumberGenerator* gen) :
+         generator(gen, [](auto) {}) {}
+
+      uuid operator()()
+      {
+         uint8_t bytes[16];
+         for (int i = 0; i < 16; i += 4)
+            *reinterpret_cast<uint32_t*>(bytes + i) = distribution(*generator);
+
+         // variant must be 10xxxxxx
+         bytes[8] &= 0xBF;
+         bytes[8] |= 0x80;
+
+         // version must be 0100xxxx
+         bytes[6] &= 0x4F;
+         bytes[6] |= 0x40;
+
+         return uuid{std::begin(bytes), std::end(bytes)};
+      }
 
    private:
-
+      std::uniform_int_distribution<uint32_t>  distribution;
+      std::shared_ptr<UniformRandomNumberGenerator> generator;
    };
 
    using uuid_random_generator = basic_uuid_random_generator<std::mt19937>;
+
+   namespace detail
+   {
+      template <typename TChar>
+      constexpr inline unsigned char hex2char(TChar const ch)
+      {
+         if (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9'))
+            return ch - static_cast<TChar>('0');
+         if (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f'))
+            return 10 + ch - static_cast<TChar>('a');
+         if (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'))
+            return 10 + ch - static_cast<TChar>('A');
+         return 0;
+      }
+
+      template <typename TChar>
+      constexpr inline bool is_hex(TChar const ch)
+      {
+         return
+            (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9')) ||
+            (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f')) ||
+            (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'));
+      }
+
+      template <typename TChar>
+      constexpr inline unsigned char hexpair2char(TChar const a, TChar const b)
+      {
+         return (hex2char(a) << 4) | hex2char(b);
+      }
+   }
+
+   uuid::uuid(std::string_view str)
+   {
+      create(str.data(), str.size());
+   }
+
+   uuid::uuid(std::wstring_view str)
+   {
+      create(str.data(), str.size());
+   }
+
+   template <typename TChar>
+   void uuid::create(TChar const * const str, size_t const size)
+   {
+      TChar digit = 0;
+      bool firstdigit = true;
+      size_t index = 0;
+
+      for (size_t i = 0; i < size; ++i)
+      {
+         if (str[i] == static_cast<TChar>('-')) continue;
+
+         if (index >= 16 || !detail::is_hex(str[i]))
+         {
+            std::fill(std::begin(data), std::end(data), 0);
+            return;
+         }
+
+         if (firstdigit)
+         {
+            digit = str[i];
+            firstdigit = false;
+         }
+         else
+         {
+            data[index++] = detail::hexpair2char(digit, str[i]);
+            firstdigit = true;
+         }
+      }
+
+      if (index < 16)
+      {
+         std::fill(std::begin(data), std::end(data), 0);
+      }
+   }
 }
 
 namespace std
 {
    template <>
-   void swap(uuids::uuid & lhs, uuids::uuid & rhs);
+   void swap(uuids::uuid & lhs, uuids::uuid & rhs)
+   {
+      lhs.swap(rhs);
+   }
 
    template <>
    struct hash<uuids::uuid>
@@ -264,7 +452,7 @@ namespace std
       result_type operator()(argument_type const &uuid) const
       {
          std::hash<std::string> hasher;
-         return static_cast<result_type>(hasher(uuid.string()));
+         return static_cast<result_type>(hasher(uuids::to_string(uuid)));
       }
    };
 }

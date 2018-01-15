@@ -25,13 +25,13 @@ int main()
       {
          auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
          uuid guid(str);
-         assert(guid.string() == str);
+         assert(uuids::to_string(guid) == str);
       }
 
       {
          uuid guid("47183823-2574-4bfd-b411-99ed177d3e43");
-         assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
-         assert(guid.wstring() == L"47183823-2574-4bfd-b411-99ed177d3e43");
+         assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
+         assert(uuids::to_wstring(guid) == L"47183823-2574-4bfd-b411-99ed177d3e43");
       }
    }
 
@@ -42,7 +42,7 @@ int main()
 
       auto str = L"47183823-2574-4bfd-b411-99ed177d3e43"s;
       uuid guid(str);
-      assert(guid.wstring() == str);
+      assert(uuids::to_wstring(guid) == str);
    }
 
    {
@@ -59,7 +59,7 @@ int main()
                0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43} };
 
          uuid guid(std::begin(arr), std::end(arr));
-         assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+         assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43"s);
       }
 
       {
@@ -71,18 +71,8 @@ int main()
             0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 };
 
          uuid guid(std::begin(arr), std::end(arr));
-         assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+         assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43"s);
       }
-   }
-
-   {
-      std::cout << "Test default generator" << std::endl;
-
-      uuid const guid = uuids::uuid_default_generator{}();
-      assert(!guid.nil());
-      assert(guid.size() == 16);
-      assert(guid.version() == uuids::uuid_version::random_number_based);
-      assert(guid.variant() == uuids::uuid_variant::rfc);
    }
 
    {
@@ -163,8 +153,8 @@ int main()
       std::cout << "Test string conversion" << std::endl;
 
       uuid empty;
-      assert(empty.string() == "00000000-0000-0000-0000-000000000000");
-      assert(empty.wstring() == L"00000000-0000-0000-0000-000000000000");
+      assert(uuids::to_string(empty) == "00000000-0000-0000-0000-000000000000");
+      assert(uuids::to_wstring(empty) == L"00000000-0000-0000-0000-000000000000");
    }   
 
    {
@@ -183,7 +173,7 @@ int main()
 
       std::copy(std::cbegin(arr), std::cend(arr), std::begin(guid));
       assert(!guid.nil());
-      assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
+      assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
 
       size_t i = 0;
       for (auto const & b : guid)
@@ -202,19 +192,195 @@ int main()
       constexpr uuid_version version = empty.version();
    }
 
-   {/*
-      auto id1 = make_uuid();
 
-      uuid_default_generator dgen;
-      auto id2 = make_uuid(dgen);
-      auto id3 = make_uuid(dgen);
+   {
+      std::cout << "Test default generator" << std::endl;
+
+      uuid const guid = uuids::uuid_default_generator{}();
+      assert(!guid.nil());
+      assert(guid.size() == 16);
+      assert(guid.version() == uuids::uuid_version::random_number_based);
+      assert(guid.variant() == uuids::uuid_variant::rfc);
+   }
+
+   {
+      std::cout << "Test random generator (default ctor)" << std::endl;
+
+      uuids::uuid_random_generator dgen;
+      auto id1 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+   }
+
+   {
+      std::cout << "Test random generator (conversion ctor w/ ptr)" << std::endl;
 
       std::random_device rd;
-      std::mt19937 mtgen(rd());
-      uuid_random_generator<std::mt19937> rgen(mtgen);
-      auto id4 = make_uuid(rgen);
-      auto id5 = make_uuid(rgen);
-   */}
+      auto seed_data = std::array<int, std::mt19937::state_size> {};
+      std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+      std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+      std::mt19937 generator(seq);
+
+      uuids::uuid_random_generator dgen(&generator);
+      auto id1 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+   }
+
+   {
+      std::cout << "Test random generator (conversion ctor w/ ptr)" << std::endl;
+
+      std::random_device rd;
+      auto seed_data = std::array<int, std::mt19937::state_size> {};
+      std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+      std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+      auto generator = std::make_unique<std::mt19937>(seq);
+
+      uuids::uuid_random_generator dgen(generator.get());
+      auto id1 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+   }
+
+   {
+      std::cout << "Test random generator (conversion ctor w/ ref)" << std::endl;
+
+      std::random_device rd;
+      auto seed_data = std::array<int, std::mt19937::state_size> {};
+      std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+      std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+      std::mt19937 generator(seq);
+
+      uuids::uuid_random_generator dgen(generator);
+      auto id1 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+   }
+
+   {
+      std::cout << "Test basic random generator (default ctor) w/ ranlux48_base" << std::endl;
+
+      uuids::basic_uuid_random_generator<std::ranlux48_base> dgen;
+      auto id1 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+   }
+
+   {
+      std::cout << "Test basic random generator (conversion ctor w/ ptr) w/ ranlux48_base" << std::endl;
+
+      std::random_device rd;
+      std::ranlux48_base generator(rd());
+
+      uuids::basic_uuid_random_generator<std::ranlux48_base> dgen(&generator);
+      auto id1 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+   }
+
+   {
+      std::cout << "Test basic random generator (conversion ctor w/ ptr) w/ ranlux48_base" << std::endl;
+
+      std::random_device rd;
+      auto generator = std::make_unique<std::ranlux48_base>(rd());
+
+      uuids::basic_uuid_random_generator<std::ranlux48_base> dgen(generator.get());
+      auto id1 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+   }
+
+   {
+      std::cout << "Test basic random generator (conversion ctor w/ ref) w/ ranlux48_base" << std::endl;
+
+      std::random_device rd;
+      std::ranlux48_base generator(rd());
+
+      uuids::basic_uuid_random_generator<std::ranlux48_base> dgen(generator);
+      auto id1 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen();
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::random_number_based);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+   }
 
    std::cout << "ALL PASSED" << std::endl;
 
