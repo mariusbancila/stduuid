@@ -52,7 +52,7 @@ int main()
       using namespace std::string_literals;
 
       {
-         std::array<uint8_t, 16> arr{ {
+         std::array<uuids::uuid::value_type, 16> arr{ {
                0x47, 0x18, 0x38, 0x23,
                0x25, 0x74,
                0x4b, 0xfd,
@@ -64,7 +64,7 @@ int main()
       }
 
       {
-         uint8_t arr[16] = {
+         uuids::uuid::value_type arr[16] = {
             0x47, 0x18, 0x38, 0x23,
             0x25, 0x74,
             0x4b, 0xfd,
@@ -91,16 +91,17 @@ int main()
       std::cout << "Test comparison" << std::endl;
 
       auto empty = uuid{};
-      auto id = uuids::uuid_default_generator{}();
+      uuids::uuid_default_generator gen;
+      auto id = gen();
 
       assert(empty < id);
 
       std::set<uuids::uuid> ids{
          uuid{},
-         uuids::uuid_default_generator{}(),
-         uuids::uuid_default_generator{}(),
-         uuids::uuid_default_generator{}(),
-         uuids::uuid_default_generator{}()
+         gen(),
+         gen(),
+         gen(),
+         gen()
       };
 
       assert(ids.size() == 5);
@@ -118,12 +119,14 @@ int main()
       auto h2 = std::hash<uuid>{};
       assert(h1(str) == h2(guid));
 
+      uuids::uuid_default_generator gen;
+
       std::unordered_set<uuids::uuid> ids{
          uuid{},
-         uuids::uuid_default_generator{}(),
-         uuids::uuid_default_generator{}(),
-         uuids::uuid_default_generator{}(),
-         uuids::uuid_default_generator{}()
+         gen(),
+         gen(),
+         gen(),
+         gen()
       };
 
       assert(ids.size() == 5);
@@ -161,7 +164,7 @@ int main()
    {
       std::cout << "Test iterators" << std::endl;
 
-      std::array<uint8_t, 16> arr{{
+      std::array<uuids::uuid::value_type, 16> arr{{
          0x47, 0x18, 0x38, 0x23,
          0x25, 0x74,
          0x4b, 0xfd,

@@ -21,6 +21,36 @@
 
 namespace uuids
 {
+   namespace detail
+   {
+      template <typename TChar>
+      constexpr inline unsigned char hex2char(TChar const ch)
+      {
+         if (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9'))
+            return ch - static_cast<TChar>('0');
+         if (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f'))
+            return 10 + ch - static_cast<TChar>('a');
+         if (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'))
+            return 10 + ch - static_cast<TChar>('A');
+         return 0;
+      }
+
+      template <typename TChar>
+      constexpr inline bool is_hex(TChar const ch)
+      {
+         return
+            (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9')) ||
+            (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f')) ||
+            (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'));
+      }
+
+      template <typename TChar>
+      constexpr inline unsigned char hexpair2char(TChar const a, TChar const b)
+      {
+         return (hex2char(a) << 4) | hex2char(b);
+      }
+   }
+
    // UUID format https://tools.ietf.org/html/rfc4122
    // Field	                     NDR Data Type	   Octet #	Note
    // --------------------------------------------------------------------------------------------------------------------------
@@ -397,8 +427,15 @@ namespace uuids
             std::copy(first, last, std::begin(data));
       }
 
-      explicit uuid(std::string_view str);
-      explicit uuid(std::wstring_view str);
+      explicit uuid(std::string_view str)
+      {
+         create(str.data(), str.size());
+      }
+
+      explicit uuid(std::wstring_view str)
+      {
+         create(str.data(), str.size());
+      }
 
       constexpr uuid_variant variant() const noexcept
       {
@@ -457,11 +494,43 @@ namespace uuids
       friend bool operator==(uuid const & lhs, uuid const & rhs) noexcept;
       friend bool operator<(uuid const & lhs, uuid const & rhs) noexcept;
 
-      template <typename TChar>
-      void create(TChar const * const str, size_t const size);
-
       template <class Elem, class Traits>
       friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);
+   
+      template <typename TChar>
+      void create(TChar const * const str, size_t const size)
+      {
+         TChar digit = 0;
+         bool firstdigit = true;
+         size_t index = 0;
+
+         for (size_t i = 0; i < size; ++i)
+         {
+            if (str[i] == static_cast<TChar>('-')) continue;
+
+            if (index >= 16 || !detail::is_hex(str[i]))
+            {
+               std::fill(std::begin(data), std::end(data), 0);
+               return;
+            }
+
+            if (firstdigit)
+            {
+               digit = str[i];
+               firstdigit = false;
+            }
+            else
+            {
+               data[index++] = detail::hexpair2char(digit, str[i]);
+               firstdigit = true;
+            }
+         }
+
+         if (index < 16)
+         {
+            std::fill(std::begin(data), std::end(data), 0);
+         }
+      }
    };
 
    inline bool operator== (uuid const& lhs, uuid const& rhs) noexcept
@@ -655,81 +724,6 @@ namespace uuids
    };
 
    using uuid_random_generator = basic_uuid_random_generator<std::mt19937>;
-
-   namespace detail
-   {
-      template <typename TChar>
-      constexpr inline unsigned char hex2char(TChar const ch)
-      {
-         if (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9'))
-            return ch - static_cast<TChar>('0');
-         if (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f'))
-            return 10 + ch - static_cast<TChar>('a');
-         if (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'))
-            return 10 + ch - static_cast<TChar>('A');
-         return 0;
-      }
-
-      template <typename TChar>
-      constexpr inline bool is_hex(TChar const ch)
-      {
-         return
-            (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9')) ||
-            (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f')) ||
-            (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'));
-      }
-
-      template <typename TChar>
-      constexpr inline unsigned char hexpair2char(TChar const a, TChar const b)
-      {
-         return (hex2char(a) << 4) | hex2char(b);
-      }
-   }
-
-   uuid::uuid(std::string_view str)
-   {
-      create(str.data(), str.size());
-   }
-
-   uuid::uuid(std::wstring_view str)
-   {
-      create(str.data(), str.size());
-   }
-
-   template <typename TChar>
-   void uuid::create(TChar const * const str, size_t const size)
-   {
-      TChar digit = 0;
-      bool firstdigit = true;
-      size_t index = 0;
-
-      for (size_t i = 0; i < size; ++i)
-      {
-         if (str[i] == static_cast<TChar>('-')) continue;
-
-         if (index >= 16 || !detail::is_hex(str[i]))
-         {
-            std::fill(std::begin(data), std::end(data), 0);
-            return;
-         }
-
-         if (firstdigit)
-         {
-            digit = str[i];
-            firstdigit = false;
-         }
-         else
-         {
-            data[index++] = detail::hexpair2char(digit, str[i]);
-            firstdigit = true;
-         }
-      }
-
-      if (index < 16)
-      {
-         std::fill(std::begin(data), std::end(data), 0);
-      }
-   }
 }
 
 namespace std
