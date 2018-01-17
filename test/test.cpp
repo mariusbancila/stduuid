@@ -231,10 +231,10 @@ int main()
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id1.nil());
-      assert(id1.size() == 16);
-      assert(id1.version() == uuids::uuid_version::random_number_based);
-      assert(id1.variant() == uuids::uuid_variant::rfc);
+      assert(!id2.nil());
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::random_number_based);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
 
       assert(id1 != id2);
    }
@@ -256,10 +256,10 @@ int main()
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id1.nil());
-      assert(id1.size() == 16);
-      assert(id1.version() == uuids::uuid_version::random_number_based);
-      assert(id1.variant() == uuids::uuid_variant::rfc);
+      assert(!id2.nil());
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::random_number_based);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
 
       assert(id1 != id2);
    }
@@ -282,9 +282,9 @@ int main()
 
       auto id2 = dgen();
       assert(!id1.nil());
-      assert(id1.size() == 16);
-      assert(id1.version() == uuids::uuid_version::random_number_based);
-      assert(id1.variant() == uuids::uuid_variant::rfc);
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::random_number_based);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
 
       assert(id1 != id2);
    }
@@ -306,10 +306,10 @@ int main()
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id1.nil());
-      assert(id1.size() == 16);
-      assert(id1.version() == uuids::uuid_version::random_number_based);
-      assert(id1.variant() == uuids::uuid_variant::rfc);
+      assert(!id2.nil());
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::random_number_based);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
 
       assert(id1 != id2);
    }
@@ -326,9 +326,9 @@ int main()
 
       auto id2 = dgen();
       assert(!id1.nil());
-      assert(id1.size() == 16);
-      assert(id1.version() == uuids::uuid_version::random_number_based);
-      assert(id1.variant() == uuids::uuid_variant::rfc);
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::random_number_based);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
 
       assert(id1 != id2);
    }
@@ -347,10 +347,10 @@ int main()
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id1.nil());
-      assert(id1.size() == 16);
-      assert(id1.version() == uuids::uuid_version::random_number_based);
-      assert(id1.variant() == uuids::uuid_variant::rfc);
+      assert(!id2.nil());
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::random_number_based);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
 
       assert(id1 != id2);
    }
@@ -369,10 +369,10 @@ int main()
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id1.nil());
-      assert(id1.size() == 16);
-      assert(id1.version() == uuids::uuid_version::random_number_based);
-      assert(id1.variant() == uuids::uuid_variant::rfc);
+      assert(!id2.nil());
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::random_number_based);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
 
       assert(id1 != id2);
    }
@@ -391,12 +391,45 @@ int main()
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id1.nil());
-      assert(id1.size() == 16);
-      assert(id1.version() == uuids::uuid_version::random_number_based);
-      assert(id1.variant() == uuids::uuid_variant::rfc);
+      assert(!id2.nil());
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::random_number_based);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
 
       assert(id1 != id2);
+   }
+
+   {
+      std::cout << "Test name generator" << std::endl;
+
+      uuids::uuid_name_generator dgen(uuids::uuid_default_generator{}());
+      auto id1 = dgen("john");
+      assert(!id1.nil());
+      assert(id1.size() == 16);
+      assert(id1.version() == uuids::uuid_version::name_based_sha1);
+      assert(id1.variant() == uuids::uuid_variant::rfc);
+
+      auto id2 = dgen("jane");
+      assert(!id2.nil());
+      assert(id2.size() == 16);
+      assert(id2.version() == uuids::uuid_version::name_based_sha1);
+      assert(id2.variant() == uuids::uuid_variant::rfc);
+
+      auto id3 = dgen("jane");
+      assert(!id3.nil());
+      assert(id3.size() == 16);
+      assert(id3.version() == uuids::uuid_version::name_based_sha1);
+      assert(id3.variant() == uuids::uuid_variant::rfc);
+
+      auto id4 = dgen(L"jane");
+      assert(!id4.nil());
+      assert(id4.size() == 16);
+      assert(id4.version() == uuids::uuid_version::name_based_sha1);
+      assert(id4.variant() == uuids::uuid_variant::rfc);
+
+      assert(id1 != id2);
+      assert(id2 == id3);
+      assert(id3 != id4);
    }
 
    std::cout << "ALL PASSED" << std::endl;
