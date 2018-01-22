@@ -193,8 +193,95 @@ assert(ids.find(uuid{}) != ids.end());
 ```
 
 ### Generating new uuids
+Several function objects, called generators, are provided in order to create different versions of UUIDs.
 
-TBD
+Examples for generating new UUIDs with the `basic_uuid_random_generator` class:
+```
+{
+  basic_uuid_random_generator<std::mt19937> dgen;
+  auto id1 = dgen();
+  assert(!id1.nil());
+  assert(id1.size() == 16);
+  assert(id1.version() == uuid_version::random_number_based);
+  assert(id1.variant() == uuid_variant::rfc);
+}
+{
+  basic_uuid_random_generator<std::ranlux48_base> dgen;
+  auto id1 = dgen();
+  assert(!id1.nil());
+  assert(id1.size() == 16);
+  assert(id1.version() == uuid_version::random_number_based);
+  assert(id1.variant() == uuid_variant::rfc);
+}
+{
+  std::random_device rd;
+  std::ranlux48_base generator(rd());
+
+  basic_uuid_random_generator<std::ranlux48_base> dgen(&generator);
+  auto id1 = dgen();
+  assert(!id1.nil());
+  assert(id1.size() == 16);
+  assert(id1.version() == uuid_version::random_number_based);
+  assert(id1.variant() == uuid_variant::rfc);
+}
+{
+  std::random_device rd;
+  auto generator = std::make_unique<std::mt19937>(rd());
+
+  basic_uuid_random_generator<std::mt19937> dgen(generator.get());
+  auto id1 = dgen();
+  assert(!id1.nil());
+  assert(id1.size() == 16);
+  assert(id1.version() == uuid_version::random_number_based);
+  assert(id1.variant() == uuid_variant::rfc);      
+}
+```
+Examples for generating new UUIDs with the `uuid_random_generator` type alias:
+```
+uuid_random_generator dgen;
+auto id1 = dgen();
+assert(!id1.nil());
+assert(id1.size() == 16);
+assert(id1.version() == uuid_version::random_number_based);
+assert(id1.variant() == uuid_variant::rfc);
+```      
+Examples for genearting new UUIDs with the `uuid_name_generator` class:
+```
+uuid_name_generator dgen(uuid{"415ccc2b-f5cf-4ec1-b544-45132a518cc8");
+auto id1 = dgen("john");
+assert(!id1.nil());
+assert(id1.size() == 16);
+assert(id1.version() == uuid_version::name_based_sha1);
+assert(id1.variant() == uuid_variant::rfc);
+
+auto id2 = dgen("jane");
+assert(!id2.nil());
+assert(id2.size() == 16);
+assert(id2.version() == uuid_version::name_based_sha1);
+assert(id2.variant() == uuid_variant::rfc);
+
+auto id3 = dgen("jane");
+assert(!id3.nil());
+assert(id3.size() == 16);
+assert(id3.version() == uuid_version::name_based_sha1);
+assert(id3.variant() == uuid_variant::rfc);
+
+auto id4 = dgen(L"jane");
+assert(!id4.nil());
+assert(id4.size() == 16);
+assert(id4.version() == uuid_version::name_based_sha1);
+assert(id4.variant() == uuid_variant::rfc);
+
+assert(id1 != id2);
+assert(id2 == id3);
+assert(id3 != id4);
+```
+Examples for genearting new UUIDs with the `uuid_default_generator` class:
+```
+uuid const id = uuid_default_generator{}();
+assert(!id.nil());
+assert(id.size() == 16);
+```
 
 ## IV. Technical Specifications
 
@@ -296,6 +383,50 @@ namespace std {
    std::string to_string(uuid const & id);
    std::wstring to_wstring(uuid const & id);
 }
+```
+
+### Generators
+`basic_uuid_random_generator<T>` is a class template for generating random or pseudo-random UUIDs (version 4, i.e. `uuid_version::random_number_based`). The type template parameter represents a function object that implements both the [`RandomNumberEngine`](http://en.cppreference.com/w/cpp/concept/UniformRandomBitGenerator) and [`UniformRandomBitGenerator`](http://en.cppreference.com/w/cpp/concept/RandomNumberEngine) concepts. `basic_uuid_random_generator` can be either default constructed or constructed with a reference or pointer to a an objects that satisfies the `UniformRandomNumberGenerator` requirements.
+```
+template <typename UniformRandomNumberGenerator>
+class basic_uuid_random_generator 
+{
+public:
+  typedef uuid result_type;
+
+  basic_uuid_random_generator();
+  explicit basic_uuid_random_generator(UniformRandomNumberGenerator& gen);
+  explicit basic_uuid_random_generator(UniformRandomNumberGenerator* gen);
+
+  uuid operator()();
+};
+```
+A type alias `uuid_random_generator` is provided for convenience as `std::mt19937` is probably the preferred choice of a pesudo-random number generator engine in most cases.
+```
+using uuid_random_generator = basic_uuid_random_generator<std::mt19937>;
+```
+`uuid_name_generator` is a function object that generates new UUIDs from a name. It has to be initialized with another UUID and has overloaded operator() for both `std::string_view` and `std::wstring_view`.
+```
+class uuid_name_generator
+{
+public:
+  typedef uuid result_type;
+
+  explicit uuid_name_generator(uuid const& namespace_uuid) noexcept;
+  
+  uuid operator()(std::string_view name);
+  uuid operator()(std::wstring_view name);
+};
+```
+`uuid_default_generator` is a class or a type alias for another existing class that is default constructible and implements `operator()` to create a new `uuid` object.
+```
+class uuid_default_generator
+{
+public:
+  typedef uuid result_type;
+
+  uuid operator()();
+};
 ```
 
 ### Specialization
