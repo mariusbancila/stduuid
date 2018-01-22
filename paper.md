@@ -405,7 +405,7 @@ A type alias `uuid_random_generator` is provided for convenience as `std::mt1993
 ```
 using uuid_random_generator = basic_uuid_random_generator<std::mt19937>;
 ```
-`uuid_name_generator` is a function object that generates new UUIDs from a name. It has to be initialized with another UUID and has overloaded operator() for both `std::string_view` and `std::wstring_view`.
+`uuid_name_generator` is a function object that generates new UUIDs from a name. It has to be initialized with another UUID and has overloaded `operator()` for both `std::string_view` and `std::wstring_view`.
 ```
 class uuid_name_generator
 {
@@ -418,7 +418,7 @@ public:
   uuid operator()(std::wstring_view name);
 };
 ```
-`uuid_default_generator` is a class or a type alias for another existing class that is default constructible and implements `operator()` to create a new `uuid` object.
+`uuid_default_generator` is a class or a type alias for another existing class that is default constructible and implements `operator()` to create a new `uuid` object. This is provided purely for convenience in order to make it simple for developers that simply want to create a new UUID to do it so in a simple manner without caring about versions, initialization, etc., with code as simple as `uuid_default_generator{}()`.
 ```
 class uuid_default_generator
 {
