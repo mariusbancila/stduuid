@@ -70,16 +70,20 @@ uuid::value_type arr[16] = {
 uuid id(arr);
 ```      
 
-### Capacity
+### Size
 
 Member function `size()` indicates the number of bytes in the UUID. Because this is a fixed size structure this function always returns 16.
+```
+uuid id;
+assert(id.size() == 16);
+```
 
-Member function `nil()` indicates whether the `uuid` has all the bits set to 0. A nil uuid is created by the default constructor or by the string conversion constructors when failing to parse the input argument.
+### Nil
 
+A nil UUID is a special UUID that has all the bits set to 0. Its canonical textaul representation is `00000000-0000-0000-0000-000000000000`. Member function `nil()` indicates whether the `uuid` has all the bits set to 0. A nil uuid is created by the default constructor or by the string conversion constructors when failing to parse the input argument.
 ```
 uuid id;
 assert(id.nil());
-assert(id.size() == 16);
 ```
 
 ### Iterators
