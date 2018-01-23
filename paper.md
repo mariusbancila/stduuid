@@ -147,8 +147,8 @@ Non-member functions `to_string()` and `to_wstring()` return a string with the U
 
 ```
 uuid id("47183823-2574-4bfd-b411-99ed177d3e43");
-assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
-assert(id.wstring() == L"47183823-2574-4bfd-b411-99ed177d3e43");
+assert(to_string(id) == "47183823-2574-4bfd-b411-99ed177d3e43");
+assert(to_wstring(id) == L"47183823-2574-4bfd-b411-99ed177d3e43");
 ```
 
 ### `operator==` and `operator!=`
