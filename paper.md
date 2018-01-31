@@ -280,12 +280,6 @@ assert(id1 != id2);
 assert(id2 == id3);
 assert(id3 != id4);
 ```
-Examples for genearting new UUIDs with the `uuid_default_generator` class:
-```
-uuid const id = uuid_default_generator{}();
-assert(!id.nil());
-assert(id.size() == 16);
-```
 
 ## IV. Technical Specifications
 
@@ -422,24 +416,11 @@ public:
   uuid operator()(std::wstring_view name);
 };
 ```
-`uuid_default_generator` is a class or a type alias for another existing class that is default constructible and implements `operator()` to create a new `uuid` object. This is provided purely for convenience in order to make it simple for developers that simply want to create a new UUID to do it so in a simple manner without caring about versions, initialization, etc., with code as simple as `uuid_default_generator{}()`.
-```
-class uuid_default_generator
-{
-public:
-  typedef uuid result_type;
-
-  uuid operator()();
-};
-```
 
 ### Specialization
 
 ```
 namespace std {
-   template <>
-   void swap(uuid & lhs, uuid & rhs);
-
    template <>
    struct hash<uuid>
    {
