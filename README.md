@@ -129,7 +129,7 @@ assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
 * Comparing UUIDS
 ```
 uuid empty;
-uuid guid = uuids::uuid_default_generator{}();
+uuid guid = uuids::uuid_system_generator{}();
 
 assert(empty == empty);
 assert(guid == guid);
@@ -138,7 +138,7 @@ assert(empty != guid);
 * Swapping UUIDS
 ```
 uuid empty;
-uuid guid = uuids::uuid_default_generator{}();
+uuid guid = uuids::uuid_system_generator{}();
 
 assert(empty.nil());
 assert(!guid.nil());
@@ -181,7 +181,7 @@ for (auto const & b : guid)
 ```
 * Using with an orderered associative container
 ```
-uuids::uuid_default_generator gen;
+uuids::uuid_random_generator gen;
 std::set<uuids::uuid> ids{uuid{}, gen(), gen(), gen(), gen()};
 
 assert(ids.size() == 5);
@@ -189,7 +189,7 @@ assert(ids.find(uuid{}) != ids.end());
 ```
 * Using in an unordered associative container
 ```
-uuids::uuid_default_generator gen;
+uuids::uuid_random_generator gen;
 std::unordered_set<uuids::uuid> ids{uuid{}, gen(), gen(), gen(), gen()};
 
 assert(ids.size() == 5);
