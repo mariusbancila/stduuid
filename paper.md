@@ -57,7 +57,7 @@ std::array<uuid::value_type, 16> arr{{
    0xb4, 0x11,
    0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
 }};
-uuid id(arr);
+uuid id(std::begin(arr), std::end(arr));
 ```
 
 ```
@@ -67,7 +67,7 @@ uuid::value_type arr[16] = {
    0x4b, 0xfd,
    0xb4, 0x11,
    0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 };
-uuid id(arr);
+uuid id(std::begin(arr), std::end(arr));
 ```      
 
 ### Size
