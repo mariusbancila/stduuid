@@ -322,18 +322,16 @@ namespace std {
 namespace std {
 struct uuid
 {
-  struct uuid_const_iterator {};
-  
-  struct uuid_iterator {};
 public:
   typedef uint8_t               value_type;
   typedef uint8_t&              reference;
   typedef uint8_t const&        const_reference;
-  typedef uuid_iterator         iterator;
-  typedef uuid_const_iterator   const_iterator;
   typedef std::size_t           size_type;
   typedef std::ptrdiff_t        difference_type;
 
+  typedef /*implementation-defined*/ iterator;
+  typedef /*implementation-defined*/ const_iterator;
+    
   static constexpr size_t state_size = 16;
 
 public:
