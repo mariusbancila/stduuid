@@ -17,10 +17,10 @@ This proposal is a pure library extension. It does not require changes to any st
 The proposed library, that should be available in a new header called `<uuid>` in the namespace `std`, provides:
 * a class called `uuid` that represents a universally unique identifier
 * strongly type enums `uuid_variant` and `uuid_version` to represent the possible variant and version types of a UUID
-* function objects that generate UUIDs, called generators: `basic_uuid_random_generator<T>`, `uuid_random_generator`, `uuid_name_generator`, and `uuid_default_generator`
+* function objects that generate UUIDs, called generators: `basic_uuid_random_generator<T>`, `uuid_random_generator`, `uuid_name_generator`
 * string conversion functions `std::to_string()`, `std::to_wstring()` as well as an overloaded `operator<<` for `std::basic_ostream`
 * comparison operators `==`, `!=`, `<`
-* `std::swap<>` specialization for `uuid`
+* `std::swap()` overload for `uuid`
 * `std::hash<>` specialization for `uuid`
 
 ### Default constructor
