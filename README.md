@@ -20,7 +20,7 @@ Generators:
 
 | Name | Description | 
 | ---- | ----------- |
-| `uuid_default_generator` | a function object that generates new UUIDs. Althoug the specification says this can be a type alias for another generator (that is default constructible), in this implementation it is using an operating system methods to create UUIDs (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac) |
+| `uuid_system_generator` | a function object that generates new UUIDs using operating system resources (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac) |
 | ` basic_uuid_random_generator` | a function object that generates version 4 UUIDs using a pseudo-random number generator engine. |
 | `uuid_random_generator` | a basic_uuid_random_generator using the Marsenne Twister engine, i.e. `basic_uuid_random_generator<std::mt19937>` |
 | `uuid_name_generator` | a function object that generates version 5, name-based UUIDs using SHA1 hashing. |
@@ -54,7 +54,7 @@ assert(empty.size() == 16);
 ```
 * Creating a new UUID
 ```
-uuid const guid = uuids::uuid_default_generator{}();
+uuid const guid = uuids::uuid_system_generator{}();
 assert(!guid.nil());
 assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::random_number_based);
