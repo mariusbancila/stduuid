@@ -125,7 +125,7 @@ assert(id.variant() == uuid_variant::rfc);
 
 ### Swapping
 
-Both member and non-member swap functions including a `std::swap<>` specialization that enable the swapping of `uuid` values.
+Both member and non-member `swap()` functions are available to perform the swapping of `uuid` values.
 
 ```
 uuid empty;
@@ -418,7 +418,7 @@ public:
 ```
 
 ### Specialization
-
+The template specializations of `std::hash` for the `uuid` class allow users to obtain hashes of UUIDs. 
 ```
 namespace std {
    template <>
