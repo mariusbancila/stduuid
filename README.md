@@ -20,9 +20,10 @@ Generators:
 
 | Name | Description | 
 | ---- | ----------- |
-| `uuid_default_generator` | a function object that generates new UUIDs, using an operating system method to create one (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac) |
+| `uuid_default_generator` | a function object that generates new UUIDs. Althoug the specification says this can be a type alias for another generator (that is default constructible), in this implementation it is using an operating system methods to create UUIDs (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac) |
 | ` basic_uuid_random_generator` | a function object that generates version 4 UUIDs using a pseudo-random number generator engine. |
 | `uuid_random_generator` | a basic_uuid_random_generator using the Marsenne Twister engine, i.e. `basic_uuid_random_generator<std::mt19937>` |
+| `uuid_name_generator` | a function object that generates version 5, name-based UUIDs using SHA1 hashing. |
 
 Utilities:
 
@@ -78,6 +79,15 @@ uuid const guid = gen();
 assert(!guid.nil());
 assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::random_number_based);
+assert(guid.variant() == uuids::uuid_variant::rfc);
+```
+* Creating a new UUID with the name generator
+```
+uuids::uuid_name_generator gen;
+uuid const guid = gen();
+assert(!guid.nil());
+assert(guid.size() == 16);
+assert(guid.version() == uuids::uuid_version::name_based_sha1);
 assert(guid.variant() == uuids::uuid_variant::rfc);
 ```
 * Create a UUID from a string
@@ -192,11 +202,6 @@ auto h2 = std::hash<uuid>{};
 assert(h1(str) == h2(guid));
 ```
 
-## Limitations
-The library can only create new uuids using the underlaying operating system resources. 
-
-An alternative to this library could be the [boost::uuid](http://www.boost.org/doc/libs/1_65_1/libs/uuid/) library. This has a similar model, but supports creating all variant of uuids, including md5 and sha1 name based, time based, and random number based values.
-
 ## Support
 The library is supported on all major operating systems: Windows, Linux and Mac OS.
 
@@ -207,3 +212,6 @@ A testing project is available in the sources. To build and execute the tests do
 * Run the command `cmake ..` from the `build` directory; if you do not have CMake you must install it first.
 * Build the project created in the previous step
 * Run the executable.
+
+## Credits
+The SHA1 implementation is based on the [TinySHA1](https://github.com/mohaps/TinySHA1) library.

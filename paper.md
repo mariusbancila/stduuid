@@ -17,14 +17,15 @@ This proposal is a pure library extension. It does not require changes to any st
 The proposed library, that should be available in a new header called `<uuid>` in the namespace `std`, provides:
 * a class called `uuid` that represents a universally unique identifier
 * strongly type enums `uuid_variant` and `uuid_version` to represent the possible variant and version types of a UUID
-* a `make_uuid` function to generate a new UUID
+* function objects that generate UUIDs, called generators: `basic_uuid_random_generator<T>`, `uuid_random_generator`, `uuid_name_generator`, and `uuid_default_generator`
+* string conversion functions `std::to_string()`, `std::to_wstring()` as well as an overloaded `operator<<` for `std::basic_ostream`
 * comparison operators `==`, `!=`, `<`
 * `std::swap<>` specialization for `uuid`
 * `std::hash<>` specialization for `uuid`
 
 ### Default constructor
 
-Creates a nil UUID that has all the bits set to 0 (i.e. 00000000-0000-0000-0000-000000000000).
+Creates a nil UUID that has all the bits set to 0 (i.e. `00000000-0000-0000-0000-000000000000`).
 
 ```
 uuid empty;
@@ -49,58 +50,54 @@ uuid id2(str);
 The conversion constructor that takes two forward iterators constructs an `uuid` with the content of the range \[first, last). It requires the range to have exactly 16 elements, otherwise the result is a nil `uuid`. This constructor follows the conventions of other containers in the standard library.
 
 ```
-std::array<std::byte, 16> arr{{
-   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-   std::byte{ 0x25 }, std::byte{ 0x74 },
-   std::byte{ 0x4b }, std::byte{ 0xfd },
-   std::byte{ 0xb4 }, std::byte{ 0x11 },
-   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 } }};
-uuid id(arr);
+std::array<uuid::value_type, 16> arr{{
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
+}};
+uuid id(std::begin(arr), std::end(arr));
 ```
 
 ```
-std::byte arr[16] = {
-   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-   std::byte{ 0x25 }, std::byte{ 0x74 },
-   std::byte{ 0x4b }, std::byte{ 0xfd },
-   std::byte{ 0xb4 }, std::byte{ 0x11 },
-   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 }};
-uuid id(arr);
+uuid::value_type arr[16] = {
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 };
+uuid id(std::begin(arr), std::end(arr));
 ```      
 
-### Capacity
+### Size
 
 Member function `size()` indicates the number of bytes in the UUID. Because this is a fixed size structure this function always returns 16.
-
-Member function `nil()` indicates whether the `uuid` has all the bits set to 0. A nil uuid is created by the default constructor or by the string conversion constructors when failing to parse the input argument.
-
 ```
 uuid id;
-assert(id.nil());
 assert(id.size() == 16);
 ```
 
-### String conversion
+### Nil
 
-Member functions `string` and `wstring` return a string with the UUID formatted to the canonical textual representation `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`, where `x` is a lower case hexadecimal digit.
-
+A nil UUID is a special UUID that has all the bits set to 0. Its canonical textaul representation is `00000000-0000-0000-0000-000000000000`. Member function `nil()` indicates whether the `uuid` has all the bits set to 0. A nil uuid is created by the default constructor or by the string conversion constructors when failing to parse the input argument.
 ```
-uuid id("47183823-2574-4bfd-b411-99ed177d3e43");
-assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
-assert(id.wstring() == L"47183823-2574-4bfd-b411-99ed177d3e43");
-```         
+uuid id;
+assert(id.nil());
+```
 
 ### Iterators
 
-Constant and mutable iterators allow direct access to the underlaying `uuid` data. This enables both direct reading and writing of the `uuid` bits.
+Constant and mutable iterators allow direct access to the underlaying `uuid` data. This enables both direct reading and writing of the `uuid` bits. The `uuid` class has both const and non-const `begin()` and `end()` members to return constant and mutable iterators to the first and the one-past-last element of the UUID data. 
 
 ```
-std::array<std::byte, 16> arr{{
-   std::byte{ 0x47 }, std::byte{ 0x18 }, std::byte{ 0x38 }, std::byte{ 0x23 },
-   std::byte{ 0x25 }, std::byte{ 0x74 },
-   std::byte{ 0x4b }, std::byte{ 0xfd },
-   std::byte{ 0xb4 }, std::byte{ 0x11 },
-   std::byte{ 0x99 }, std::byte{ 0xed }, std::byte{ 0x17 }, std::byte{ 0x7d }, std::byte{ 0x3e }, std::byte{ 0x43 } }};
+std::array<uuid::value_type, 16> arr{{
+   0x47, 0x18, 0x38, 0x23,
+   0x25, 0x74,
+   0x4b, 0xfd,
+   0xb4, 0x11,
+   0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43
+}};
 
 uuid id;
 assert(id.nil());
@@ -113,6 +110,8 @@ size_t i = 0;
 for (auto const & b : id)
    assert(arr[i++] == b);
 ```
+
+Because the internal representation may not be a straightforward array of bytes and may have arbitrary endianness iterators are not defined as pointers.
 
 ### `variant` and `version`
 
@@ -146,6 +145,16 @@ assert(empty.nil());
 assert(!id.nil());
 ```
 
+### String conversion
+
+Non-member functions `to_string()` and `to_wstring()` return a string with the UUID formatted to the canonical textual representation `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`, where `x` is a lower case hexadecimal digit.
+
+```
+uuid id("47183823-2574-4bfd-b411-99ed177d3e43");
+assert(to_string(id) == "47183823-2574-4bfd-b411-99ed177d3e43");
+assert(to_wstring(id) == L"47183823-2574-4bfd-b411-99ed177d3e43");
+```
+
 ### `operator==` and `operator!=`
 
 Non-member operators == and != are provided in order to test the equality/inequality of two `uuid` values.
@@ -166,11 +175,10 @@ Although it does not make sense to check whether a uuid is less or less or equal
 ```
 std::set<std::uuid> ids{
    uuid{},
-   uuid("47183823-2574-4bfd-b411-99ed177d3e43"),
-   make_uuid()
+   uuid("47183823-2574-4bfd-b411-99ed177d3e43")
 };
 
-assert(ids.size() == 3);
+assert(ids.size() == 2);
 assert(ids.find(uuid{}) != ids.end());
 ```
 
@@ -182,22 +190,101 @@ A `std::hash<>` specialization for `uuid` is provided in order to enable the use
 std::unordered_set<uuid> ids{
    uuid{},
    uuid("47183823-2574-4bfd-b411-99ed177d3e43"),
-   make_uuid()
 };
 
-assert(ids.size() == 3);
+assert(ids.size() == 2);
 assert(ids.find(uuid{}) != ids.end());
 ```
 
 ### Generating new uuids
+Several function objects, called generators, are provided in order to create different versions of UUIDs.
 
-Non-member `make_uuid` function creates a new uuid by relying on the operating system APIs for this purpose. In practice, all the major operating system APIs (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Max OS) produce version 4 UUIDs of the RFC variant.
-
+Examples for generating new UUIDs with the `basic_uuid_random_generator` class:
 ```
-auto id = make_uuid();
+{
+  basic_uuid_random_generator<std::mt19937> dgen;
+  auto id1 = dgen();
+  assert(!id1.nil());
+  assert(id1.size() == 16);
+  assert(id1.version() == uuid_version::random_number_based);
+  assert(id1.variant() == uuid_variant::rfc);
+}
+{
+  basic_uuid_random_generator<std::ranlux48_base> dgen;
+  auto id1 = dgen();
+  assert(!id1.nil());
+  assert(id1.size() == 16);
+  assert(id1.version() == uuid_version::random_number_based);
+  assert(id1.variant() == uuid_variant::rfc);
+}
+{
+  std::random_device rd;
+  std::ranlux48_base generator(rd());
+
+  basic_uuid_random_generator<std::ranlux48_base> dgen(&generator);
+  auto id1 = dgen();
+  assert(!id1.nil());
+  assert(id1.size() == 16);
+  assert(id1.version() == uuid_version::random_number_based);
+  assert(id1.variant() == uuid_variant::rfc);
+}
+{
+  std::random_device rd;
+  auto generator = std::make_unique<std::mt19937>(rd());
+
+  basic_uuid_random_generator<std::mt19937> dgen(generator.get());
+  auto id1 = dgen();
+  assert(!id1.nil());
+  assert(id1.size() == 16);
+  assert(id1.version() == uuid_version::random_number_based);
+  assert(id1.variant() == uuid_variant::rfc);      
+}
+```
+Examples for generating new UUIDs with the `uuid_random_generator` type alias:
+```
+uuid_random_generator dgen;
+auto id1 = dgen();
+assert(!id1.nil());
+assert(id1.size() == 16);
+assert(id1.version() == uuid_version::random_number_based);
+assert(id1.variant() == uuid_variant::rfc);
+```      
+Examples for genearting new UUIDs with the `uuid_name_generator` class:
+```
+uuid_name_generator dgen(uuid{"415ccc2b-f5cf-4ec1-b544-45132a518cc8");
+auto id1 = dgen("john");
+assert(!id1.nil());
+assert(id1.size() == 16);
+assert(id1.version() == uuid_version::name_based_sha1);
+assert(id1.variant() == uuid_variant::rfc);
+
+auto id2 = dgen("jane");
+assert(!id2.nil());
+assert(id2.size() == 16);
+assert(id2.version() == uuid_version::name_based_sha1);
+assert(id2.variant() == uuid_variant::rfc);
+
+auto id3 = dgen("jane");
+assert(!id3.nil());
+assert(id3.size() == 16);
+assert(id3.version() == uuid_version::name_based_sha1);
+assert(id3.variant() == uuid_variant::rfc);
+
+auto id4 = dgen(L"jane");
+assert(!id4.nil());
+assert(id4.size() == 16);
+assert(id4.version() == uuid_version::name_based_sha1);
+assert(id4.variant() == uuid_variant::rfc);
+
+assert(id1 != id2);
+assert(id2 == id3);
+assert(id3 != id4);
+```
+Examples for genearting new UUIDs with the `uuid_default_generator` class:
+```
+uuid const id = uuid_default_generator{}();
 assert(!id.nil());
-assert(id.version() == uuid_version::random_number_based);
-assert(id.variant() == uuid_variant::rfc);
+assert(id.size() == 16);
 ```
 
 ## IV. Technical Specifications
@@ -241,14 +328,19 @@ namespace std {
 namespace std {
 struct uuid
 {
+  struct uuid_const_iterator {};
+  
+  struct uuid_iterator {};
 public:
-  typedef std::byte          value_type;
-  typedef std::byte&         reference;
-  typedef std::byte const&   const_reference;
-  typedef std::byte*         iterator;
-  typedef std::byte const*   const_iterator;
-  typedef std::size_t        size_type;
-  typedef std::ptrdiff_t     difference_type;
+  typedef uint8_t               value_type;
+  typedef uint8_t&              reference;
+  typedef uint8_t const&        const_reference;
+  typedef uuid_iterator         iterator;
+  typedef uuid_const_iterator   const_iterator;
+  typedef std::size_t           size_type;
+  typedef std::ptrdiff_t        difference_type;
+
+  static constexpr size_t state_size = 16;
 
 public:
   constexpr uuid() noexcept;
@@ -272,13 +364,6 @@ public:
   iterator end() noexcept;
   const_iterator end() const noexcept;
 
-  template<class CharT, 
-     class Traits = std::char_traits<CharT>,
-     class Alloc = std::allocator<CharT>>
-  std::basic_string<CharT, Traits, Alloc> string(Alloc const & a = Alloc()) const;
-  std::string string() const;
-  std::wstring wstring() const;
-
 private:
   friend bool operator==(uuid const & lhs, uuid const & rhs) noexcept;
   friend bool operator<(uuid const & lhs, uuid const & rhs) noexcept;
@@ -299,8 +384,53 @@ namespace std {
    template <class Elem, class Traits>
    std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);
 
-   uuid make_uuid();
+   std::string to_string(uuid const & id);
+   std::wstring to_wstring(uuid const & id);
 }
+```
+
+### Generators
+`basic_uuid_random_generator<T>` is a class template for generating random or pseudo-random UUIDs (version 4, i.e. `uuid_version::random_number_based`). The type template parameter represents a function object that implements both the [`RandomNumberEngine`](http://en.cppreference.com/w/cpp/concept/UniformRandomBitGenerator) and [`UniformRandomBitGenerator`](http://en.cppreference.com/w/cpp/concept/RandomNumberEngine) concepts. `basic_uuid_random_generator` can be either default constructed or constructed with a reference or pointer to a an objects that satisfies the `UniformRandomNumberGenerator` requirements.
+```
+template <typename UniformRandomNumberGenerator>
+class basic_uuid_random_generator 
+{
+public:
+  typedef uuid result_type;
+
+  basic_uuid_random_generator();
+  explicit basic_uuid_random_generator(UniformRandomNumberGenerator& gen);
+  explicit basic_uuid_random_generator(UniformRandomNumberGenerator* gen);
+
+  uuid operator()();
+};
+```
+A type alias `uuid_random_generator` is provided for convenience as `std::mt19937` is probably the preferred choice of a pesudo-random number generator engine in most cases.
+```
+using uuid_random_generator = basic_uuid_random_generator<std::mt19937>;
+```
+`uuid_name_generator` is a function object that generates new UUIDs from a name. It has to be initialized with another UUID and has overloaded `operator()` for both `std::string_view` and `std::wstring_view`.
+```
+class uuid_name_generator
+{
+public:
+  typedef uuid result_type;
+
+  explicit uuid_name_generator(uuid const& namespace_uuid) noexcept;
+  
+  uuid operator()(std::string_view name);
+  uuid operator()(std::wstring_view name);
+};
+```
+`uuid_default_generator` is a class or a type alias for another existing class that is default constructible and implements `operator()` to create a new `uuid` object. This is provided purely for convenience in order to make it simple for developers that simply want to create a new UUID to do it so in a simple manner without caring about versions, initialization, etc., with code as simple as `uuid_default_generator{}()`.
+```
+class uuid_default_generator
+{
+public:
+  typedef uuid result_type;
+
+  uuid operator()();
+};
 ```
 
 ### Specialization
@@ -321,13 +451,7 @@ namespace std {
 }
 ```
 
-## V. Limitations
-
-The library does not support creating different versions of UUIDs. Generating version 3 (name-based versiong using MD5 hashing) and version 5 (name-based version using SHA1 hashing) are made impossible by the lack of standard support for MD5 and SHA1 cryptographic hash function. Instead, the library relies on the underlying operating system functionalities for creating UUIDs.
-
-This limitation should be irrelevant for most practical use cases. In the event UUIDs need to be generated with a specific version other than the one provided by the underlying system, users can resort to a 3rd party implementation such as `boost::uuid`.
-
-## VI. References
+## V. References
 
 * [1] Universally unique identifier, https://en.wikipedia.org/wiki/Universally_unique_identifier
 * [2] A Universally Unique IDentifier (UUID) URN Namespace, https://tools.ietf.org/html/rfc4122
