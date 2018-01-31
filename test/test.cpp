@@ -80,7 +80,7 @@ int main()
       std::cout << "Test equality" << std::endl;
 
       uuid empty;
-      uuid guid = uuids::uuid_default_generator{}();
+      uuid guid = uuids::uuid_random_generator{}();
 
       assert(empty == empty);
       assert(guid == guid);
@@ -91,7 +91,7 @@ int main()
       std::cout << "Test comparison" << std::endl;
 
       auto empty = uuid{};
-      uuids::uuid_default_generator gen;
+      uuids::uuid_random_generator gen;
       auto id = gen();
 
       assert(empty < id);
@@ -119,7 +119,7 @@ int main()
       auto h2 = std::hash<uuid>{};
       assert(h1(str) == h2(guid));
 
-      uuids::uuid_default_generator gen;
+      uuids::uuid_random_generator gen;
 
       std::unordered_set<uuids::uuid> ids{
          uuid{},
@@ -137,7 +137,7 @@ int main()
       std::cout << "Test swap" << std::endl;
 
       uuid empty;
-      uuid guid = uuids::uuid_default_generator{}();
+      uuid guid = uuids::uuid_random_generator{}();
 
       assert(empty.nil());
       assert(!guid.nil());
@@ -213,7 +213,7 @@ int main()
    {
       std::cout << "Test default generator" << std::endl;
 
-      uuid const guid = uuids::uuid_default_generator{}();
+      uuid const guid = uuids::uuid_random_generator{}();
       assert(!guid.nil());
       assert(guid.size() == 16);
       assert(guid.version() == uuids::uuid_version::random_number_based);
@@ -402,7 +402,7 @@ int main()
    {
       std::cout << "Test name generator" << std::endl;
 
-      uuids::uuid_name_generator dgen(uuids::uuid_default_generator{}());
+      uuids::uuid_name_generator dgen(uuids::uuid{"47183823-2574-4bfd-b411-99ed177d3e43"});
       auto id1 = dgen("john");
       assert(!id1.nil());
       assert(id1.size() == 16);

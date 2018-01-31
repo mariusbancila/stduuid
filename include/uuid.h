@@ -659,11 +659,6 @@ namespace uuids
          data.swap(other.data);
       }
 
-      friend void swap(uuid& lhs, uuid& rhs) noexcept
-      {
-         std::swap(lhs.data, rhs.data);
-      }
-
       iterator begin() noexcept { return uuid_iterator(&data[0], 0); }
       const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
       iterator end() noexcept { return uuid_iterator(&data[0], state_size); }
@@ -769,7 +764,12 @@ namespace uuids
       return sstr.str();
    }
 
-   class uuid_default_generator
+   inline void swap(uuids::uuid & lhs, uuids::uuid & rhs)
+   {
+      lhs.swap(rhs);
+   }
+
+   class uuid_system_generator
    {
    public:
       typedef uuid result_type;
@@ -981,12 +981,6 @@ namespace uuids
 
 namespace std
 {
-   template <>
-   void swap(uuids::uuid & lhs, uuids::uuid & rhs)
-   {
-      lhs.swap(rhs);
-   }
-
    template <>
    struct hash<uuids::uuid>
    {
