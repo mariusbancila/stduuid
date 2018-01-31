@@ -349,7 +349,6 @@ public:
   constexpr bool nil() const noexcept;
 
   void swap(uuid & other) noexcept;
-  friend void swap(uuid& lhs, uuid& rhs) noexcept;
 
   iterator begin() noexcept;
   const_iterator begin() const noexcept;
@@ -372,6 +371,8 @@ namespace std {
    inline bool operator== (uuid const& lhs, uuid const& rhs) noexcept;
    inline bool operator!= (uuid const& lhs, uuid const& rhs) noexcept;
    inline bool operator< (uuid const& lhs, uuid const& rhs) noexcept;
+   
+   inline void swap(uuids::uuid & lhs, uuids::uuid & rhs);
    
    template <class Elem, class Traits>
    std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);
