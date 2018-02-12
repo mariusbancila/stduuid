@@ -1,3 +1,11 @@
+| | |
+| --- | --- |
+| Doc. No.: | D0xxxRn |
+| Date: | 2018-02-12 |
+| Reply to: | Marius Bancila |
+| Audience: | Library WG |
+| Title: | A Proposal for a Universally Unique Identifier Library |
+
 # A Proposal for a Universally Unique Identifier Library
 
 ## I. Motivation
