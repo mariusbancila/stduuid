@@ -6,11 +6,11 @@ Universally unique identifiers (*uuid*), also known as Globally Unique Identifie
 
 UUIDs are 128-bit numbers that are for most practical purposes unique, without depending on a central registration authority for ensuring their uniqueness. Although the probability of UUID duplication exists, it is negligible. According to Wikipedia, "*for there to be a one in a billion chance of duplication, 103 trillion version 4 UUIDs must be generated.*" UUID is an Internet Engineering Task Force standard described by RFC 4122.
 
-The library proposed on this paper is a light one: it enables developers to generate UUIDs based on the operation system facilities, serialize and deserialize UUIDs to and from strings, validate UUIDs and other common ensuing operations.
+The library proposed on this paper is a light one: it enables developers to generate random and name-based UUIDs, serialize and deserialize UUIDs to and from strings, validate UUIDs and other common operations.
 
 ## II. Impact On the Standard
 
-This proposal is a pure library extension. It does not require changes to any standard classes, functions or headers. It does not require any changes in the core language, and it has been implemented in standard C++ as per ISO/IEC 14882:2017.
+This proposal is a pure library extension. It does not require changes to any standard classes, functions or headers. It does not require any changes in the core language, and it has been implemented in standard C++ as per ISO/IEC 14882:2017. The implementation is available at https://github.com/mariusbancila/stduuid.
 
 ## III. Design Decisions
 
