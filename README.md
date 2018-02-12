@@ -6,7 +6,7 @@ For information about UUID/GUIDs see:
 * [A Universally Unique IDentifier (UUID) URN Namespace](https://www.ietf.org/rfc/rfc4122.txt)
 
 ## Library overview
-The library defines a namespace `uuids` with the following types and functions:
+Although the specification puts the uuid library in the `std` namespace, this implementation uses the namespace `uuids` for this purpose, in order to make the library usable without violating the restrictions imposed on the `std` namespace. The following types and utilities are available:
 
 Basic types:
 
