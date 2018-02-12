@@ -80,7 +80,7 @@ assert(id.size() == 16);
 
 ### Nil
 
-A nil UUID is a special UUID that has all the bits set to 0. Its canonical textaul representation is `00000000-0000-0000-0000-000000000000`. Member function `nil()` indicates whether the `uuid` has all the bits set to 0. A nil uuid is created by the default constructor or by the string conversion constructors when failing to parse the input argument.
+A nil UUID is a special UUID that has all the bits set to 0. Its canonical textual representation is `00000000-0000-0000-0000-000000000000`. Member function `nil()` indicates whether the `uuid` has all the bits set to 0. A nil uuid is created by the default constructor or by the string conversion constructors when failing to parse the input argument.
 ```
 uuid id;
 assert(id.nil());
@@ -115,7 +115,7 @@ Because the internal representation may not be a straightforward array of bytes 
 
 ### `variant` and `version`
 
-Member functions `variant()` and `version()` allows to check the variant type of the uuid and respetively the version type. These are defined by two strongly typed enums called `uuid_variant` and `uuid_version`.
+Member functions `variant()` and `version()` allow checingk the variant type of the uuid and respetively the version type. These are defined by two strongly typed enums called `uuid_variant` and `uuid_version`.
 
 ```
 uuid id("47183823-2574-4bfd-b411-99ed177d3e43");
@@ -157,7 +157,7 @@ assert(to_wstring(id) == L"47183823-2574-4bfd-b411-99ed177d3e43");
 
 ### `operator==` and `operator!=`
 
-Non-member operators == and != are provided in order to test the equality/inequality of two `uuid` values.
+Non-member `operators ==` and `operator !=` are provided in order to test the equality/inequality of two `uuid` values.
 
 ```
 uuid empty;
@@ -170,7 +170,7 @@ assert(empty != id);
 
 ### `operator<`
 
-Although it does not make sense to check whether a uuid is less or less or equal then another uuid, the overloading of this operator for `uuid` is necessary in order to be able to store `uuid` values in some containers such as `std::set` that by default use the operator to compare keys.
+Although it does not make sense to check whether a UUID is less or less or equal then another UUID, the overloading of this operator for `uuid` is necessary in order to be able to store `uuid` values in containers such as `std::set` that by default use `operator <` to compare keys.
 
 ```
 std::set<std::uuid> ids{
