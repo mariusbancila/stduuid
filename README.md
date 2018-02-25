@@ -18,23 +18,23 @@ Basic types:
 
 Generators:
 
-| Name | Description | 
+| Name | Description |
 | ---- | ----------- |
 | `uuid_system_generator` | a function object that generates new UUIDs using operating system resources (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac) |
-| ` basic_uuid_random_generator` | a function object that generates version 4 UUIDs using a pseudo-random number generator engine. |
+| `basic_uuid_random_generator` | a function object that generates version 4 UUIDs using a pseudo-random number generator engine. |
 | `uuid_random_generator` | a basic_uuid_random_generator using the Marsenne Twister engine, i.e. `basic_uuid_random_generator<std::mt19937>` |
 | `uuid_name_generator` | a function object that generates version 5, name-based UUIDs using SHA1 hashing. |
 
 Utilities:
 
-| Name | Description | 
+| Name | Description |
 | ---- | ----------- |
 | `std::swap<>` | specialization of `swap` for `uuid` |
 | `std::hash<>` | specialization of `hash` for `uuid` (necessary for storing UUIDs in unordered associative containers, such as `std::unordered_set`) |
 
 Other:
 
-| Name | Description | 
+| Name | Description |
 | ---- | ----------- |
 | `operator==` and `operator!=` | for UUIDs comparison for equality/inequality |
 | `operator<` | for comparing whether one UUIDs is less than another. Although this operation does not make much logical sense, it is necessary in order to store UUIDs in a std::set. |
@@ -47,13 +47,13 @@ This project is currently under development and should be ignored until further 
 ## Using the library
 The following is a list of examples for using the library:
 * Creating a nil UUID
-```
+```cpp
 uuid empty;
 assert(empty.nil());
 assert(empty.size() == 16);
 ```
 * Creating a new UUID
-```
+```cpp
 uuid const guid = uuids::uuid_system_generator{}();
 assert(!guid.nil());
 assert(guid.size() == 16);
@@ -61,7 +61,7 @@ assert(guid.version() == uuids::uuid_version::random_number_based);
 assert(guid.variant() == uuids::uuid_variant::rfc);
 ```
 * Creating a new UUID with a default random generator
-```
+```cpp
 uuids::uuid_random_generator gen;
 uuid const guid = gen();
 assert(!guid.nil());
@@ -70,7 +70,7 @@ assert(guid.version() == uuids::uuid_version::random_number_based);
 assert(guid.variant() == uuids::uuid_variant::rfc);
 ```
 * Creating a new UUID with a particular random generator
-```
+```cpp
 std::random_device rd;
 std::ranlux48_base generator(rd());
 uuids::basic_uuid_random_generator<std::ranlux48_base> gen(&generator);
@@ -82,7 +82,7 @@ assert(guid.version() == uuids::uuid_version::random_number_based);
 assert(guid.variant() == uuids::uuid_variant::rfc);
 ```
 * Creating a new UUID with the name generator
-```
+```cpp
 uuids::uuid_name_generator gen;
 uuid const guid = gen();
 assert(!guid.nil());
@@ -91,7 +91,7 @@ assert(guid.version() == uuids::uuid_version::name_based_sha1);
 assert(guid.variant() == uuids::uuid_variant::rfc);
 ```
 * Create a UUID from a string
-```
+```cpp
 using namespace std::string_literals;
 
 auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
@@ -99,13 +99,13 @@ uuid guid(str);
 assert(guid.string() == str);
 ```
 or
-```
+```cpp
 auto str = L"47183823-2574-4bfd-b411-99ed177d3e43"s;
 uuid guid(str);
-assert(guid.wstring() == str);      
+assert(guid.wstring() == str);
 ```
 * Creating a UUID from an array
-```
+```cpp
 std::array<uuids::uuid::value_type, 16> arr{{
    0x47, 0x18, 0x38, 0x23,
    0x25, 0x74,
@@ -115,8 +115,8 @@ std::array<uuids::uuid::value_type, 16> arr{{
 uuid guid(std::begin(arr), std::end(arr));
 assert(id.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
 ```
-or 
-```
+or
+```cpp
 uuids::uuid::value_type arr[16] = {
    0x47, 0x18, 0x38, 0x23,
    0x25, 0x74,
@@ -126,8 +126,8 @@ uuids::uuid::value_type arr[16] = {
 uuid guid(std::begin(arr), std::end(arr));
 assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
 ```
-* Comparing UUIDS
-```
+* Comparing UUIDs
+```cpp
 uuid empty;
 uuid guid = uuids::uuid_system_generator{}();
 
@@ -135,8 +135,8 @@ assert(empty == empty);
 assert(guid == guid);
 assert(empty != guid);
 ```
-* Swapping UUIDS
-```
+* Swapping UUIDs
+```cpp
 uuid empty;
 uuid guid = uuids::uuid_system_generator{}();
 
@@ -154,13 +154,13 @@ assert(empty.nil());
 assert(!guid.nil());
 ```
 * Converting to string
-```
+```cpp
 uuid empty;
 assert(uuids::to_string(empty) == "00000000-0000-0000-0000-000000000000");
 assert(uuids::to_wstring(empty) == L"00000000-0000-0000-0000-000000000000");
 ```
 * Iterating through the UUID data
-```
+```cpp
 std::array<uuids::uuid::value_type, 16> arr{{
    0x47, 0x18, 0x38, 0x23,
    0x25, 0x74,
@@ -180,7 +180,7 @@ for (auto const & b : guid)
    assert(arr[i++] == b);
 ```
 * Using with an orderered associative container
-```
+```cpp
 uuids::uuid_random_generator gen;
 std::set<uuids::uuid> ids{uuid{}, gen(), gen(), gen(), gen()};
 
@@ -188,7 +188,7 @@ assert(ids.size() == 5);
 assert(ids.find(uuid{}) != ids.end());
 ```
 * Using in an unordered associative container
-```
+```cpp
 uuids::uuid_random_generator gen;
 std::unordered_set<uuids::uuid> ids{uuid{}, gen(), gen(), gen(), gen()};
 
@@ -196,7 +196,7 @@ assert(ids.size() == 5);
 assert(ids.find(uuid{}) != ids.end());
 ```
 * Hashing UUIDs
-```
+```cpp
 auto h1 = std::hash<std::string>{};
 auto h2 = std::hash<uuid>{};
 assert(h1(str) == h2(guid));
