@@ -49,13 +49,13 @@ The following is a list of examples for using the library:
 * Creating a nil UUID
 ```cpp
 uuid empty;
-assert(empty.nil());
+assert(empty.is_nil());
 assert(empty.size() == 16);
 ```
 * Creating a new UUID
 ```cpp
 uuid const guid = uuids::uuid_system_generator{}();
-assert(!guid.nil());
+assert(!guid.is_nil());
 assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::random_number_based);
 assert(guid.variant() == uuids::uuid_variant::rfc);
@@ -64,7 +64,7 @@ assert(guid.variant() == uuids::uuid_variant::rfc);
 ```cpp
 uuids::uuid_random_generator gen;
 uuid const guid = gen();
-assert(!guid.nil());
+assert(!guid.is_nil());
 assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::random_number_based);
 assert(guid.variant() == uuids::uuid_variant::rfc);
@@ -76,7 +76,7 @@ std::ranlux48_base generator(rd());
 uuids::basic_uuid_random_generator<std::ranlux48_base> gen(&generator);
 
 uuid const guid = gen();
-assert(!guid.nil());
+assert(!guid.is_nil());
 assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::random_number_based);
 assert(guid.variant() == uuids::uuid_variant::rfc);
@@ -85,7 +85,7 @@ assert(guid.variant() == uuids::uuid_variant::rfc);
 ```cpp
 uuids::uuid_name_generator gen;
 uuid const guid = gen();
-assert(!guid.nil());
+assert(!guid.is_nil());
 assert(guid.size() == 16);
 assert(guid.version() == uuids::uuid_version::name_based_sha1);
 assert(guid.variant() == uuids::uuid_variant::rfc);
@@ -140,18 +140,18 @@ assert(empty != guid);
 uuid empty;
 uuid guid = uuids::uuid_system_generator{}();
 
-assert(empty.nil());
-assert(!guid.nil());
+assert(empty.is_nil());
+assert(!guid.is_nil());
 
 std::swap(empty, guid);
 
-assert(!empty.nil());
-assert(guid.nil());
+assert(!empty.is_nil());
+assert(guid.is_nil());
 
 empty.swap(guid);
 
-assert(empty.nil());
-assert(!guid.nil());
+assert(empty.is_nil());
+assert(!guid.is_nil());
 ```
 * Converting to string
 ```cpp
@@ -169,10 +169,10 @@ std::array<uuids::uuid::value_type, 16> arr{{
    0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
 
 uuid guid;
-assert(guid.nil());
+assert(guid.is_nil());
 
 std::copy(std::cbegin(arr), std::cend(arr), std::begin(guid));
-assert(!guid.nil());
+assert(!guid.is_nil());
 assert(guid.string() == "47183823-2574-4bfd-b411-99ed177d3e43");
 
 size_t i = 0;

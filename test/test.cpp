@@ -14,7 +14,7 @@ int main()
       std::cout << "Test default constructor" << std::endl;
 
       uuid empty;
-      assert(empty.nil());
+      assert(empty.is_nil());
       assert(empty.size() == 16);
    }
 
@@ -139,18 +139,18 @@ int main()
       uuid empty;
       uuid guid = uuids::uuid_random_generator{}();
 
-      assert(empty.nil());
-      assert(!guid.nil());
+      assert(empty.is_nil());
+      assert(!guid.is_nil());
 
       std::swap(empty, guid);
 
-      assert(!empty.nil());
-      assert(guid.nil());
+      assert(!empty.is_nil());
+      assert(guid.is_nil());
 
       empty.swap(guid);
 
-      assert(empty.nil());
-      assert(!guid.nil());
+      assert(empty.is_nil());
+      assert(!guid.is_nil());
    }
 
    {
@@ -174,10 +174,10 @@ int main()
 
       {
          uuid guid;
-         assert(guid.nil());
+         assert(guid.is_nil());
 
          std::copy(std::cbegin(arr), std::cend(arr), std::begin(guid));
-         assert(!guid.nil());
+         assert(!guid.is_nil());
          assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
 
          size_t i = 0;
@@ -189,7 +189,7 @@ int main()
 
       {
          const uuid guid("47183823-2574-4bfd-b411-99ed177d3e43");
-         assert(!guid.nil());
+         assert(!guid.is_nil());
          assert(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
 
          size_t i = 0;
@@ -204,7 +204,7 @@ int main()
       std::cout << "Test constexpr" << std::endl;
 
       constexpr uuid empty;
-      constexpr bool isnil = empty.nil();
+      constexpr bool isnil = empty.is_nil();
       constexpr size_t size = empty.size();
       constexpr uuid_variant variant = empty.variant();
       constexpr uuid_version version = empty.version();
@@ -214,7 +214,7 @@ int main()
       std::cout << "Test default generator" << std::endl;
 
       uuid const guid = uuids::uuid_random_generator{}();
-      assert(!guid.nil());
+      assert(!guid.is_nil());
       assert(guid.size() == 16);
       assert(guid.version() == uuids::uuid_version::random_number_based);
       assert(guid.variant() == uuids::uuid_variant::rfc);
@@ -225,13 +225,13 @@ int main()
 
       uuids::uuid_random_generator dgen;
       auto id1 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::random_number_based);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id2.nil());
+      assert(!id2.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::random_number_based);
       assert(id2.variant() == uuids::uuid_variant::rfc);
@@ -250,13 +250,13 @@ int main()
 
       uuids::uuid_random_generator dgen(&generator);
       auto id1 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::random_number_based);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id2.nil());
+      assert(!id2.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::random_number_based);
       assert(id2.variant() == uuids::uuid_variant::rfc);
@@ -275,13 +275,13 @@ int main()
 
       uuids::uuid_random_generator dgen(generator.get());
       auto id1 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::random_number_based);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::random_number_based);
       assert(id2.variant() == uuids::uuid_variant::rfc);
@@ -300,13 +300,13 @@ int main()
 
       uuids::uuid_random_generator dgen(generator);
       auto id1 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::random_number_based);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id2.nil());
+      assert(!id2.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::random_number_based);
       assert(id2.variant() == uuids::uuid_variant::rfc);
@@ -319,13 +319,13 @@ int main()
 
       uuids::basic_uuid_random_generator<std::ranlux48_base> dgen;
       auto id1 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::random_number_based);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::random_number_based);
       assert(id2.variant() == uuids::uuid_variant::rfc);
@@ -341,13 +341,13 @@ int main()
 
       uuids::basic_uuid_random_generator<std::ranlux48_base> dgen(&generator);
       auto id1 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::random_number_based);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id2.nil());
+      assert(!id2.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::random_number_based);
       assert(id2.variant() == uuids::uuid_variant::rfc);
@@ -363,13 +363,13 @@ int main()
 
       uuids::basic_uuid_random_generator<std::ranlux48_base> dgen(generator.get());
       auto id1 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::random_number_based);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id2.nil());
+      assert(!id2.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::random_number_based);
       assert(id2.variant() == uuids::uuid_variant::rfc);
@@ -385,13 +385,13 @@ int main()
 
       uuids::basic_uuid_random_generator<std::ranlux48_base> dgen(generator);
       auto id1 = dgen();
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::random_number_based);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen();
-      assert(!id2.nil());
+      assert(!id2.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::random_number_based);
       assert(id2.variant() == uuids::uuid_variant::rfc);
@@ -404,25 +404,25 @@ int main()
 
       uuids::uuid_name_generator dgen(uuids::uuid{"47183823-2574-4bfd-b411-99ed177d3e43"});
       auto id1 = dgen("john");
-      assert(!id1.nil());
+      assert(!id1.is_nil());
       assert(id1.size() == 16);
       assert(id1.version() == uuids::uuid_version::name_based_sha1);
       assert(id1.variant() == uuids::uuid_variant::rfc);
 
       auto id2 = dgen("jane");
-      assert(!id2.nil());
+      assert(!id2.is_nil());
       assert(id2.size() == 16);
       assert(id2.version() == uuids::uuid_version::name_based_sha1);
       assert(id2.variant() == uuids::uuid_variant::rfc);
 
       auto id3 = dgen("jane");
-      assert(!id3.nil());
+      assert(!id3.is_nil());
       assert(id3.size() == 16);
       assert(id3.version() == uuids::uuid_version::name_based_sha1);
       assert(id3.variant() == uuids::uuid_variant::rfc);
 
       auto id4 = dgen(L"jane");
-      assert(!id4.nil());
+      assert(!id4.is_nil());
       assert(id4.size() == 16);
       assert(id4.version() == uuids::uuid_version::name_based_sha1);
       assert(id4.variant() == uuids::uuid_variant::rfc);

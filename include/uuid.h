@@ -648,7 +648,7 @@ namespace uuids
 
       constexpr std::size_t size() const noexcept { return state_size; }
 
-      constexpr bool nil() const noexcept
+      constexpr bool is_nil() const noexcept
       {
          for (size_t i = 0; i < data.size(); ++i) if (data[i] != 0) return false;
          return true;
@@ -838,7 +838,7 @@ namespace uuids
          auto bytes = CFUUIDGetUUIDBytes(newId);
          CFRelease(newId);
 
-         std::array<uint8_t, 16> bytes =
+         std::array<uint8_t, 16> arrbytes =
          { {
                bytes.byte0,
                bytes.byte1,
@@ -857,7 +857,7 @@ namespace uuids
                bytes.byte14,
                bytes.byte15
             } };
-         return uuid{ std::begin(bytes), std::end(bytes) };
+         return uuid{ std::begin(arrbytes), std::end(arrbytes) };
 #elif
          return uuid{};
 #endif
