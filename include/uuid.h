@@ -420,8 +420,9 @@ namespace uuids
 
          self_type & operator+=(difference_type const offset)
          {
-            if (index + offset < 0 || index + offset > uuid::state_size)
-               throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
+            if (static_cast<difference_type>(index) + offset < 0 || 
+               static_cast<difference_type>(index) + offset > uuid::state_size)
+               throw std::out_of_range("Iterator cannot be incremented outside data bounds.");
 
             index += offset;
             return *this;
@@ -564,8 +565,9 @@ namespace uuids
 
          self_type & operator+=(difference_type const offset)
          {
-            if (index + offset < 0 || index + offset > uuid::state_size)
-               throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
+            if (static_cast<difference_type>(index) + offset < 0 || 
+                static_cast<difference_type>(index) + offset > uuid::state_size)
+               throw std::out_of_range("Iterator cannot be incremented outside data bounds.");
 
             index += offset;
             return *this;
@@ -750,14 +752,14 @@ namespace uuids
          << std::setw(2) << (int)id.data[15];
    }
 
-   std::string to_string(uuid const & id)
+   inline std::string to_string(uuid const & id)
    {
       std::stringstream sstr;
       sstr << id;
       return sstr.str();
    }
 
-   std::wstring to_wstring(uuid const & id)
+   inline std::wstring to_wstring(uuid const & id)
    {
       std::wstringstream sstr;
       sstr << id;
