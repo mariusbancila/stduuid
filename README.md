@@ -45,21 +45,7 @@ Other:
 This project is currently under development and should be ignored until further notice.
 
 ## Library history
-This library is an implementation of the proposal P0959. As the proposal evolves based on the standard commity and the C++ community feedback, this library implementation will reflect those changes.
-
-### Revision 1
-Changes from the first draft:
-* Removed string constructors and replaced with free overloaded function `from_string()`.
-* Parsing strings to `uuid` throws exception `uuid_error` instead of creating a nil uuid when the operation fails.
-* {} included in the supported format, i.e. `{xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx}`.
-* Removed `state_size`.
-* Rename member function `nil()` to `is_nil()`.
-* The default constructor is defaulted.
-* Added a conversion construct from `std::span<uint_8, 16>`.
-* Added the free function `as_bytes()` to convert the `uuid` into a view of its underlying bytes.
-* Constructing a `uuid` from a range with a size other than 16 is undefined behaviour.
-* Removed mutable iterators (but preserved the constant iterators).
-* Removed typedefs and others container-like parts.
+This library is an implementation of the proposal [P0959](P0959.md). As the proposal evolves based on the standard commity and the C++ community feedback, this library implementation will reflect those changes. See the revision history of the proposal for history of changes.
 
 ## Using the library
 The following is a list of examples for using the library:
