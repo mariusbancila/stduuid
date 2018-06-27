@@ -11,6 +11,7 @@
 #include <functional>
 #include <type_traits>
 #include <assert.h>
+#include <gsl/span>
 
 #ifdef _WIN32
 #include <objbase.h>
@@ -324,7 +325,7 @@ namespace uuids
 
          self_type & operator++ ()
          {
-            if (index >= uuid::state_size)
+            if (index >= 16)
                throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
             ++index;
             return *this;
@@ -420,8 +421,8 @@ namespace uuids
 
          self_type & operator+=(difference_type const offset)
          {
-            if (static_cast<difference_type>(index) + offset < 0 || 
-               static_cast<difference_type>(index) + offset > uuid::state_size)
+            if (static_cast<difference_type>(index) + offset < 0 ||
+               static_cast<difference_type>(index) + offset > 16)
                throw std::out_of_range("Iterator cannot be incremented outside data bounds.");
 
             index += offset;
@@ -439,187 +440,23 @@ namespace uuids
          }
       };
 
-      struct uuid_iterator : public uuid_const_iterator
+      typedef uint8_t value_type;
+
+   public:
+      constexpr uuid() noexcept = default;
+
+      explicit uuid(gsl::span<value_type, 16> bytes)
       {
-         typedef uuid_iterator                     self_type;
-         typedef uint8_t                           value_type;
-         typedef uint8_t&                          reference;
-         typedef uint8_t*                          pointer;
-         typedef std::random_access_iterator_tag   iterator_category;
-         typedef ptrdiff_t                         difference_type;
-
-      protected:
-         pointer ptr = nullptr;
-         size_t  index = 0;
-
-         bool compatible(self_type const & other) const noexcept
-         {
-            return ptr == other.ptr;
-         }
-
-      public:
-         explicit uuid_iterator(pointer ptr, size_t const index) :
-            ptr(ptr), index(index)
-         {
-         }
-
-         uuid_iterator(uuid_iterator const & o) = default;
-         uuid_iterator& operator=(uuid_iterator const & o) = default;
-         ~uuid_iterator() = default;
-
-         self_type & operator++ ()
-         {
-            if (index >= uuid::state_size)
-               throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
-            ++index;
-            return *this;
-         }
-
-         self_type operator++ (int)
-         {
-            self_type tmp = *this;
-            ++*this;
-            return tmp;
-         }
-
-         bool operator== (self_type const & other) const
-         {
-            assert(compatible(other));
-            return index == other.index;
-         }
-
-         bool operator!= (self_type const & other) const
-         {
-            return !(*this == other);
-         }
-
-         reference operator* () const
-         {
-            if (ptr == nullptr)
-               throw std::bad_function_call();
-            return *(ptr + index);
-         }
-
-         reference operator-> () const
-         {
-            if (ptr == nullptr)
-               throw std::bad_function_call();
-            return *(ptr + index);
-         }
-
-         uuid_iterator() = default;
-
-         self_type & operator--()
-         {
-            if (index <= 0)
-               throw std::out_of_range("Iterator cannot be decremented past the beginning of the data.");
-            --index;
-            return *this;
-         }
-
-         self_type operator--(int)
-         {
-            self_type tmp = *this;
-            --*this;
-            return tmp;
-         }
-
-         self_type operator+(difference_type offset) const
-         {
-            self_type tmp = *this;
-            return tmp += offset;
-         }
-
-         self_type operator-(difference_type offset) const
-         {
-            self_type tmp = *this;
-            return tmp -= offset;
-         }
-
-         difference_type operator-(self_type const & other) const
-         {
-            assert(compatible(other));
-            return (index - other.index);
-         }
-
-         bool operator<(self_type const & other) const
-         {
-            assert(compatible(other));
-            return index < other.index;
-         }
-
-         bool operator>(self_type const & other) const
-         {
-            return other < *this;
-         }
-
-         bool operator<=(self_type const & other) const
-         {
-            return !(other < *this);
-         }
-
-         bool operator>=(self_type const & other) const
-         {
-            return !(*this < other);
-         }
-
-         self_type & operator+=(difference_type const offset)
-         {
-            if (static_cast<difference_type>(index) + offset < 0 || 
-                static_cast<difference_type>(index) + offset > uuid::state_size)
-               throw std::out_of_range("Iterator cannot be incremented outside data bounds.");
-
-            index += offset;
-            return *this;
-         }
-
-         self_type & operator-=(difference_type const offset)
-         {
-            return *this += -offset;
-         }
-
-         value_type & operator[](difference_type const offset)
-         {
-            return (*(*this + offset));
-         }
-
-         value_type const & operator[](difference_type const offset) const
-         {
-            return (*(*this + offset));
-         }
-      };
-
-   public:
-      typedef uint8_t               value_type;
-      typedef uint8_t&              reference;
-      typedef uint8_t const&        const_reference;
-      typedef uuid_iterator         iterator;
-      typedef uuid_const_iterator   const_iterator;
-      typedef std::size_t           size_type;
-      typedef std::ptrdiff_t        difference_type;
-
-      static constexpr size_t state_size = 16;
-
-   public:
-      constexpr uuid() noexcept {}
-
+         std::copy(std::cbegin(bytes), std::cend(bytes), std::begin(data));
+      }
+      
       template<typename ForwardIterator>
       explicit uuid(ForwardIterator first, ForwardIterator last)
       {
          if (std::distance(first, last) == 16)
             std::copy(first, last, std::begin(data));
       }
-
-      explicit uuid(std::string_view str)
-      {
-         create(str.data(), str.size());
-      }
-
-      explicit uuid(std::wstring_view str)
-      {
-         create(str.data(), str.size());
-      }
-
+      
       constexpr uuid_variant variant() const noexcept
       {
          if ((data[8] & 0x80) == 0x00)
@@ -648,7 +485,7 @@ namespace uuids
             return uuid_version::none;
       }
 
-      constexpr std::size_t size() const noexcept { return state_size; }
+      constexpr std::size_t size() const noexcept { return 16; }
 
       constexpr bool is_nil() const noexcept
       {
@@ -661,53 +498,40 @@ namespace uuids
          data.swap(other.data);
       }
 
-      iterator begin() noexcept { return uuid_iterator(&data[0], 0); }
-      const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
-      iterator end() noexcept { return uuid_iterator(&data[0], state_size); }
-      const_iterator end() const noexcept { return uuid_const_iterator(&data[0], state_size); }
+      uuid_const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
+      uuid_const_iterator end() const noexcept { return uuid_const_iterator(&data[0], 16); }
 
+      inline gsl::span<std::byte, 16> as_bytes()
+      {
+         return gsl::span<std::byte, 16>(reinterpret_cast<std::byte*>(data.data()), 16);
+      }
+
+      inline gsl::span<std::byte const, 16> as_bytes() const
+      {
+         return gsl::span<std::byte const, 16>(reinterpret_cast<std::byte const*>(data.data()), 16);
+      }
    private:
-      std::array<uint8_t, 16> data{ { 0 } };
+      std::array<value_type, 16> data{ { 0 } };
 
       friend bool operator==(uuid const & lhs, uuid const & rhs) noexcept;
       friend bool operator<(uuid const & lhs, uuid const & rhs) noexcept;
 
       template <class Elem, class Traits>
-      friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);
-   
-      template <typename TChar>
-      void create(TChar const * const str, size_t const size)
+      friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);  
+
+      //friend gsl::span<std::byte, 16> as_bytes(uuid id);
+   };
+
+   struct uuid_error : public std::runtime_error
+   {
+      explicit uuid_error(std::string_view message)
+         : std::runtime_error(message.data())
       {
-         TChar digit = 0;
-         bool firstdigit = true;
-         size_t index = 0;
+      }
 
-         for (size_t i = 0; i < size; ++i)
-         {
-            if (str[i] == static_cast<TChar>('-')) continue;
-
-            if (index >= 16 || !detail::is_hex(str[i]))
-            {
-               std::fill(std::begin(data), std::end(data), 0);
-               return;
-            }
-
-            if (firstdigit)
-            {
-               digit = str[i];
-               firstdigit = false;
-            }
-            else
-            {
-               data[index++] = detail::hexpair2char(digit, str[i]);
-               firstdigit = true;
-            }
-         }
-
-         if (index < 16)
-         {
-            std::fill(std::begin(data), std::end(data), 0);
-         }
+      explicit uuid_error(char const * message)
+         : std::runtime_error(message)
+      {
       }
    };
 
@@ -750,6 +574,62 @@ namespace uuids
          << std::setw(2) << (int)id.data[13]
          << std::setw(2) << (int)id.data[14]
          << std::setw(2) << (int)id.data[15];
+   }
+
+   template <typename TChar>
+   inline uuid from_string(TChar const * const str, size_t const size)
+   {
+      TChar digit = 0;
+      bool firstDigit = true;
+      int hasBraces = 0;
+      size_t index = 0;
+      std::array<uint8_t, 16> data{ { 0 } };
+
+      if(str == nullptr || size == 0)
+         throw uuid_error{ "Wrong uuid format" };
+
+      if (str[0] == static_cast<TChar>('{'))
+         hasBraces = 1;
+      if(hasBraces && str[size-1] != static_cast<TChar>('}'))
+         throw uuid_error{ "Wrong uuid format" };
+
+      for (size_t i = hasBraces; i < size - hasBraces; ++i)
+      {
+         if (str[i] == static_cast<TChar>('-')) continue;
+
+         if (index >= 16 || !detail::is_hex(str[i]))
+         {
+            throw uuid_error{"Wrong uuid format"};
+         }
+
+         if (firstDigit)
+         {
+            digit = str[i];
+            firstDigit = false;
+         }
+         else
+         {
+            data[index++] = detail::hexpair2char(digit, str[i]);
+            firstDigit = true;
+         }
+      }
+
+      if (index < 16)
+      {
+         throw uuid_error{"Wrong uuid format"};
+      }
+
+      return uuid{std::cbegin(data), std::cend(data)};
+   }
+
+   inline uuid from_string(std::string_view str)
+   {
+      return from_string(str.data(), str.size());
+   }
+
+   inline uuid from_string(std::wstring_view str)
+   {
+      return from_string(str.data(), str.size());
    }
 
    inline std::string to_string(uuid const & id)
@@ -935,9 +815,9 @@ namespace uuids
       void reset() 
       {
          hasher.reset();
-         uint8_t bytes[uuid::state_size];
+         uint8_t bytes[16];
          std::copy(std::begin(nsuuid), std::end(nsuuid), bytes);
-         hasher.process_bytes(bytes, uuid::state_size);
+         hasher.process_bytes(bytes, 16);
       }
       
       template <typename char_type,
@@ -972,7 +852,7 @@ namespace uuids
          digest[6] &= 0x5F;
          digest[6] |= 0x50;
 
-         return uuid{ digest, digest + uuid::state_size };
+         return uuid{ digest, digest + 16 };
       }
 
    private:
