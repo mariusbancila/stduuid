@@ -501,11 +501,6 @@ namespace uuids
       constexpr uuid_const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
       constexpr uuid_const_iterator end() const noexcept { return uuid_const_iterator(&data[0], 16); }
 
-      inline gsl::span<std::byte, 16> as_bytes()
-      {
-         return gsl::span<std::byte, 16>(reinterpret_cast<std::byte*>(data.data()), 16);
-      }
-
       inline gsl::span<std::byte const, 16> as_bytes() const
       {
          return gsl::span<std::byte const, 16>(reinterpret_cast<std::byte const*>(data.data()), 16);
