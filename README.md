@@ -15,6 +15,7 @@ Basic types:
 | `uuid` | a class representing a UUID; this can be default constructed (a nil UUID), constructed from a range (defined by a pair of iterators), or from a string. |
 | `uuid_variant` | a strongly type enum representing the type of a UUID |
 | `uuid_version` | a strongly type enum representing the version of a UUID |
+| `uuid_error` | a class representing an exception type for `uuid` operations |
 
 Generators:
 
@@ -109,12 +110,12 @@ assert(id.variant() == uuids::uuid_variant::rfc);
 using namespace std::string_literals;
 
 auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
-uuid id(from_string(str));
+uuid id(uuids::uuid::from_string(str));
 assert(uuids::to_string(id) == str);
 
 // or
 
-uuid id(from_string(L"{47183823-2574-4bfd-b411-99ed177d3e43}"s));
+uuid id(uuids::uuid::from_string(L"{47183823-2574-4bfd-b411-99ed177d3e43}"s));
 assert(id.wstring() == str);
 ```
 
@@ -221,7 +222,7 @@ assert(ids.find(uuid{}) != ids.end());
 ```cpp
 using namespace std::string_literals;
 auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
-uuid id(from_string(str));
+uuid id(uuids::uuid::from_string(str));
 
 auto h1 = std::hash<std::string>{};
 auto h2 = std::hash<uuid>{};
