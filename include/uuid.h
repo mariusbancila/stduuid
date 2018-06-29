@@ -55,8 +55,8 @@ namespace uuids
       class sha1
       {
       public:
-         typedef uint32_t digest32_t[5];
-         typedef uint8_t digest8_t[20];
+         using digest32_t = uint32_t[5];
+         using digest8_t = uint8_t[20];
 
          static constexpr unsigned int block_bytes = 64;
 
@@ -297,12 +297,12 @@ namespace uuids
    {
       struct uuid_const_iterator
       {
-         typedef uuid_const_iterator               self_type;
-         typedef uint8_t                           value_type;
-         typedef uint8_t const &                   reference;
-         typedef uint8_t const *                   pointer;
-         typedef std::random_access_iterator_tag   iterator_category;
-         typedef ptrdiff_t                         difference_type;
+         using self_type         = uuid_const_iterator;
+         using value_type        = uint8_t;
+         using reference         = uint8_t const &;
+         using pointer           = uint8_t const *;
+         using iterator_category = std::random_access_iterator_tag;
+         using difference_type   = ptrdiff_t;
 
       protected:
          pointer ptr = nullptr;
@@ -648,7 +648,7 @@ namespace uuids
    class uuid_system_generator
    {
    public:
-      typedef uuid result_type;
+      using result_type = uuid;
 
       uuid operator()()
       {
@@ -744,7 +744,7 @@ namespace uuids
    class basic_uuid_random_generator 
    {
    public:
-      typedef uuid result_type;
+      using result_type = uuid;
 
       basic_uuid_random_generator()
          :generator(new UniformRandomNumberGenerator)
@@ -785,7 +785,7 @@ namespace uuids
    class uuid_name_generator
    {
    public:
-      typedef uuid result_type;
+      using result_type = uuid;
 
       explicit uuid_name_generator(uuid const& namespace_uuid) noexcept
          : nsuuid(namespace_uuid)
@@ -860,8 +860,8 @@ namespace std
    template <>
    struct hash<uuids::uuid>
    {
-      typedef uuids::uuid argument_type;
-      typedef std::size_t result_type;
+      using argument_type = uuids::uuid;
+      using result_type   = std::size_t;
 
       result_type operator()(argument_type const &uuid) const
       {
