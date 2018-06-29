@@ -190,7 +190,7 @@ TEST_CASE("Test basic random generator (conversion ctor w/ ref) w/ ranlux48_base
 
 TEST_CASE("Test name generator", "[gen][name]")
 {
-   uuids::uuid_name_generator dgen(uuids::from_string("47183823-2574-4bfd-b411-99ed177d3e43"));
+   uuids::uuid_name_generator dgen(uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43"));
    auto id1 = dgen("john");
    REQUIRE(!id1.is_nil());
    REQUIRE(id1.size() == 16);

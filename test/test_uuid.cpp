@@ -21,25 +21,25 @@ TEST_CASE("Test from_string(string_view)", "[parse]")
 
    {
       auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
-      auto guid = uuids::from_string(str);
+      auto guid = uuids::uuid::from_string(str);
       REQUIRE(uuids::to_string(guid) == str);
    }
 
    {
       auto str = "{47183823-2574-4bfd-b411-99ed177d3e43}"s;
-      auto guid = uuids::from_string(str);
+      auto guid = uuids::uuid::from_string(str);
       REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
    }
 
    {
-      auto guid = uuids::from_string("47183823-2574-4bfd-b411-99ed177d3e43");
+      auto guid = uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43");
       REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
       REQUIRE(uuids::to_wstring(guid) == L"47183823-2574-4bfd-b411-99ed177d3e43");
    }
 
    {
       auto str = "4718382325744bfdb41199ed177d3e43"s;
-      REQUIRE_NOTHROW(uuids::from_string(str));
+      REQUIRE_NOTHROW(uuids::uuid::from_string(str));
    }
 }
 
@@ -48,7 +48,7 @@ TEST_CASE("Test from_string(wstring_view)", "[parse]")
    using namespace std::string_literals;
 
    auto str = L"47183823-2574-4bfd-b411-99ed177d3e43"s;
-   auto guid = uuids::from_string(str);
+   auto guid = uuids::uuid::from_string(str);
    REQUIRE(uuids::to_wstring(guid) == str);
 }
 
@@ -58,32 +58,32 @@ TEST_CASE("Test from_string invalid format", "[parse]")
 
    {
       auto str = ""s;
-      REQUIRE_THROWS_AS(uuids::from_string(str), uuids::uuid_error);
+      REQUIRE_THROWS_AS(uuids::uuid::from_string(str), uuids::uuid_error);
    }
 
    {
       auto str = "{}"s;
-      REQUIRE_THROWS_AS(uuids::from_string(str), uuids::uuid_error);
+      REQUIRE_THROWS_AS(uuids::uuid::from_string(str), uuids::uuid_error);
    }
 
    {
       auto str = "47183823-2574-4bfd-b411-99ed177d3e4"s;
-      REQUIRE_THROWS_AS(uuids::from_string(str), uuids::uuid_error);
+      REQUIRE_THROWS_AS(uuids::uuid::from_string(str), uuids::uuid_error);
    }
 
    {
       auto str = "47183823-2574-4bfd-b411-99ed177d3e430"s;
-      REQUIRE_THROWS_AS(uuids::from_string(str), uuids::uuid_error);
+      REQUIRE_THROWS_AS(uuids::uuid::from_string(str), uuids::uuid_error);
    }
 
    {
       auto str = "{47183823-2574-4bfd-b411-99ed177d3e43"s;
-      REQUIRE_THROWS_AS(uuids::from_string(str), uuids::uuid_error);
+      REQUIRE_THROWS_AS(uuids::uuid::from_string(str), uuids::uuid_error);
    }
 
    {
       auto str = "47183823-2574-4bfd-b411-99ed177d3e43}"s;
-      REQUIRE_THROWS_AS(uuids::from_string(str), uuids::uuid_error);
+      REQUIRE_THROWS_AS(uuids::uuid::from_string(str), uuids::uuid_error);
    }
 }
 
@@ -150,7 +150,7 @@ TEST_CASE("Test hashing", "[ops]")
 {
    using namespace std::string_literals;
    auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
-   auto guid = uuids::from_string(str);
+   auto guid = uuids::uuid::from_string(str);
 
    auto h1 = std::hash<std::string>{};
    auto h2 = std::hash<uuid>{};
@@ -218,7 +218,7 @@ TEST_CASE("Test iterators", "[iter]")
    }
 
    {
-      const uuid guid = uuids::from_string("47183823-2574-4bfd-b411-99ed177d3e43");
+      const uuid guid = uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43");
       REQUIRE(!guid.is_nil());
       REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
 
@@ -246,11 +246,11 @@ TEST_CASE("Test size", "[operators]")
 
 TEST_CASE("Test assignment", "[ops]")
 {
-   auto id1 = uuids::from_string("47183823-2574-4bfd-b411-99ed177d3e43");
+   auto id1 = uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43");
    auto id2 = id1;
    REQUIRE(id1 == id2);
 
-   id1 = uuids::from_string("{fea43102-064f-4444-adc2-02cec42623f8}");
+   id1 = uuids::uuid::from_string("{fea43102-064f-4444-adc2-02cec42623f8}");
    REQUIRE(id1 != id2);
 
    auto id3 = std::move(id2);
