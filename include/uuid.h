@@ -314,7 +314,7 @@ namespace uuids
          }
 
       public:
-         explicit uuid_const_iterator(pointer ptr, size_t const index) :
+         constexpr explicit uuid_const_iterator(pointer ptr, size_t const index) :
             ptr(ptr), index(index)
          {
          }
@@ -440,7 +440,7 @@ namespace uuids
          }
       };
 
-      typedef uint8_t value_type;
+      using value_type = uint8_t;
 
    public:
       constexpr uuid() noexcept = default;
@@ -498,8 +498,8 @@ namespace uuids
          data.swap(other.data);
       }
 
-      uuid_const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
-      uuid_const_iterator end() const noexcept { return uuid_const_iterator(&data[0], 16); }
+      constexpr uuid_const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
+      constexpr uuid_const_iterator end() const noexcept { return uuid_const_iterator(&data[0], 16); }
 
       inline gsl::span<std::byte, 16> as_bytes()
       {
@@ -518,8 +518,6 @@ namespace uuids
 
       template <class Elem, class Traits>
       friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);  
-
-      //friend gsl::span<std::byte, 16> as_bytes(uuid id);
    };
 
    struct uuid_error : public std::runtime_error
