@@ -283,6 +283,19 @@ namespace uuids
       reserved
    };
 
+   struct uuid_error : public std::runtime_error
+   {
+      explicit uuid_error(std::string_view message)
+         : std::runtime_error(message.data())
+      {
+      }
+
+      explicit uuid_error(char const * message)
+         : std::runtime_error(message)
+      {
+      }
+   };
+
    // indicated by a bit pattern in octet 6, marked with M in xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx
    enum class uuid_version
    {
@@ -571,19 +584,6 @@ namespace uuids
 
       template <class Elem, class Traits>
       friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);  
-   };
-
-   struct uuid_error : public std::runtime_error
-   {
-      explicit uuid_error(std::string_view message)
-         : std::runtime_error(message.data())
-      {
-      }
-
-      explicit uuid_error(char const * message)
-         : std::runtime_error(message)
-      {
-      }
    };
 
    inline bool operator== (uuid const& lhs, uuid const& rhs) noexcept
