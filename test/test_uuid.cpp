@@ -234,10 +234,10 @@ TEST_CASE("Test iterators", "[iter]")
 TEST_CASE("Test constexpr", "[const]")
 {
    constexpr uuid empty;
-   constexpr bool isnil = empty.is_nil();
-   constexpr size_t size = empty.size();
-   constexpr uuid_variant variant = empty.variant();
-   constexpr uuid_version version = empty.version();
+   [[maybe_unused]] constexpr bool isnil = empty.is_nil();
+   [[maybe_unused]] constexpr size_t size = empty.size();
+   [[maybe_unused]] constexpr uuid_variant variant = empty.variant();
+   [[maybe_unused]] constexpr uuid_version version = empty.version();
 }
 
 TEST_CASE("Test size", "[operators]")
