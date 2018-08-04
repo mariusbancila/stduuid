@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.7.0)
-project(test_uuid)
+project(test_uuid CXX)
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/catch)
