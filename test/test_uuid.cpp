@@ -1,6 +1,7 @@
 #include "uuid.h"
 #include "catch.hpp"
 
+#include <cstring>
 #include <set>
 #include <unordered_set>
 #include <vector>
