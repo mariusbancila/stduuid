@@ -236,7 +236,7 @@ TEST_CASE("Test constexpr", "[const]")
    constexpr uuid empty;
    [[maybe_unused]] constexpr bool isnil = empty.is_nil();
    [[maybe_unused]] constexpr size_t size = empty.size();
-   [[maybe_unused]] constexpr uuid_variant variant = empty.variant();
+   [[maybe_unused]] constexpr uuids::uuid_variant variant = empty.variant();
    [[maybe_unused]] constexpr uuid_version version = empty.version();
 }
 
