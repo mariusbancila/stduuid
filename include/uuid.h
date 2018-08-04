@@ -457,7 +457,7 @@ namespace uuids
       using value_type = uint8_t;
 
    public:
-      constexpr uuid() noexcept = default;
+      constexpr uuid() noexcept : data({}) {};
 
       explicit uuid(gsl::span<value_type, 16> bytes)
       {
