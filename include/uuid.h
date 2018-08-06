@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstring>
 #include <string>
 #include <sstream>
 #include <iomanip>
@@ -282,6 +283,19 @@ namespace uuids
       reserved
    };
 
+   struct uuid_error : public std::runtime_error
+   {
+      explicit uuid_error(std::string_view message)
+         : std::runtime_error(message.data())
+      {
+      }
+
+      explicit uuid_error(char const * message)
+         : std::runtime_error(message)
+      {
+      }
+   };
+
    // indicated by a bit pattern in octet 6, marked with M in xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx
    enum class uuid_version
    {
@@ -443,7 +457,7 @@ namespace uuids
       using value_type = uint8_t;
 
    public:
-      constexpr uuid() noexcept = default;
+      constexpr uuid() noexcept : data({}) {};
 
       explicit uuid(gsl::span<value_type, 16> bytes)
       {
@@ -501,7 +515,7 @@ namespace uuids
       constexpr uuid_const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
       constexpr uuid_const_iterator end() const noexcept { return uuid_const_iterator(&data[0], 16); }
 
-      constexpr inline gsl::span<std::byte const, 16> as_bytes() const
+      inline gsl::span<std::byte const, 16> as_bytes() const
       {
          return gsl::span<std::byte const, 16>(reinterpret_cast<std::byte const*>(data.data()), 16);
       }
@@ -570,19 +584,6 @@ namespace uuids
 
       template <class Elem, class Traits>
       friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);  
-   };
-
-   struct uuid_error : public std::runtime_error
-   {
-      explicit uuid_error(std::string_view message)
-         : std::runtime_error(message.data())
-      {
-      }
-
-      explicit uuid_error(char const * message)
-         : std::runtime_error(message)
-      {
-      }
    };
 
    inline bool operator== (uuid const& lhs, uuid const& rhs) noexcept
