@@ -12,7 +12,7 @@ Basic types:
 
 | Name | Description |
 | ---- | ----------- |
-| `uuid` | a class representing a UUID; this can be default constructed (a nil UUID), constructed from a range (defined by a pair of iterators), or from a string. |
+| `uuid` | a class representing a UUID; this can be default constructed (a nil UUID), constructed from a range (defined by a pair of iterators), or from a `span`. |
 | `uuid_variant` | a strongly type enum representing the type of a UUID |
 | `uuid_version` | a strongly type enum representing the version of a UUID |
 | `uuid_error` | a class representing an exception type for `uuid` operations |
