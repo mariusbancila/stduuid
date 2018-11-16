@@ -10,6 +10,7 @@ install:
   - sudo apt-get install -qq g++-8
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
   - sudo apt-get install -qq cppcheck
+  - sudo apt-get install -qq uuid-dev
   
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
