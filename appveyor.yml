@@ -19,7 +19,7 @@ init:
 before_build:
   - mkdir build
   - cd build
-  - cmake .. -G "%GENERATOR%" -DCMAKE_CXX_FLAGS="%FLAGS%" -DCMAKE_IGNORE_PATH="C:/Program Files/Git/usr/bin"
+  - cmake .. -G "%GENERATOR%" -DBUILD_TESTS=ON -DCMAKE_CXX_FLAGS="%FLAGS%" -DCMAKE_IGNORE_PATH="C:/Program Files/Git/usr/bin"
 
 build_script:
   - cmake --build . --config Release

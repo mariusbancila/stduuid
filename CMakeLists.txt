@@ -7,7 +7,9 @@ include_directories(${CMAKE_SOURCE_DIR}/catch)
 file(GLOB headers ${CMAKE_SOURCE_DIR}/include/*.h)
 file(GLOB SOURCES "test/*.cpp" "include/*.cpp")
 
-include(CTest)
+if(BUILD_TESTS)
+    include(CTest)
+endif()
 
 if(WIN32)
 	message(status "Setting MSVC flags")
@@ -39,15 +41,17 @@ endif()
 
 message(status "** CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 
-enable_testing()
+if(BUILD_TESTS)
+    enable_testing()
 
-add_test(NAME "test_uuid" COMMAND "test_uuid" "-r compact")
-set_tests_properties("test_uuid"
-    PROPERTIES
-    PASS_REGULAR_EXPRESSION "Passed all.*")
-set_tests_properties("test_uuid"
-    PROPERTIES
-    FAIL_REGULAR_EXPRESSION "Failed \\d+ test cases")
-set_tests_properties("test_uuid"
-    PROPERTIES
-    TIMEOUT 120)
+    add_test(NAME "test_uuid" COMMAND "test_uuid" "-r compact")
+    set_tests_properties("test_uuid"
+        PROPERTIES
+        PASS_REGULAR_EXPRESSION "Passed all.*")
+    set_tests_properties("test_uuid"
+        PROPERTIES
+        FAIL_REGULAR_EXPRESSION "Failed \\d+ test cases")
+    set_tests_properties("test_uuid"
+        PROPERTIES
+        TIMEOUT 120)
+endif()

@@ -13,7 +13,7 @@ install:
   
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=Release -Wdev
+  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -Wdev
   - cd Build
   
 script:
