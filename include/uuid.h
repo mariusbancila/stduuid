@@ -11,6 +11,7 @@
 #include <memory>
 #include <functional>
 #include <type_traits>
+#include <optional>
 #include <assert.h>
 #include <gsl/span>
 
@@ -283,19 +284,6 @@ namespace uuids
       reserved
    };
 
-   struct uuid_error : public std::runtime_error
-   {
-      explicit uuid_error(std::string_view message)
-         : std::runtime_error(message.data())
-      {
-      }
-
-      explicit uuid_error(char const * message)
-         : std::runtime_error(message)
-      {
-      }
-   };
-
    // indicated by a bit pattern in octet 6, marked with M in xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx
    enum class uuid_version
    {
@@ -309,151 +297,6 @@ namespace uuids
 
    struct uuid
    {
-      struct uuid_const_iterator
-      {
-         using self_type         = uuid_const_iterator;
-         using value_type        = uint8_t;
-         using reference         = uint8_t const &;
-         using pointer           = uint8_t const *;
-         using iterator_category = std::random_access_iterator_tag;
-         using difference_type   = ptrdiff_t;
-
-      protected:
-         pointer ptr = nullptr;
-         size_t  index = 0;
-
-         bool compatible(self_type const & other) const noexcept
-         {
-            return ptr == other.ptr;
-         }
-
-      public:
-         constexpr explicit uuid_const_iterator(pointer ptr, size_t const index) :
-            ptr(ptr), index(index)
-         {
-         }
-
-         uuid_const_iterator(uuid_const_iterator const & o) = default;
-         uuid_const_iterator& operator=(uuid_const_iterator const & o) = default;
-         ~uuid_const_iterator() = default;
-
-         self_type & operator++ ()
-         {
-            if (index >= 16)
-               throw std::out_of_range("Iterator cannot be incremented past the end of the data.");
-            ++index;
-            return *this;
-         }
-
-         self_type operator++ (int)
-         {
-            self_type tmp = *this;
-            ++*this;
-            return tmp;
-         }
-
-         bool operator== (self_type const & other) const
-         {
-            assert(compatible(other));
-            return index == other.index;
-         }
-
-         bool operator!= (self_type const & other) const
-         {
-            return !(*this == other);
-         }
-
-         reference operator* () const
-         {
-            if (ptr == nullptr)
-               throw std::bad_function_call();
-            return *(ptr + index);
-         }
-
-         reference operator-> () const
-         {
-            if (ptr == nullptr)
-               throw std::bad_function_call();
-            return *(ptr + index);
-         }
-
-         uuid_const_iterator() = default;
-
-         self_type & operator--()
-         {
-            if (index <= 0)
-               throw std::out_of_range("Iterator cannot be decremented past the beginning of the data.");
-            --index;
-            return *this;
-         }
-
-         self_type operator--(int)
-         {
-            self_type tmp = *this;
-            --*this;
-            return tmp;
-         }
-
-         self_type operator+(difference_type offset) const
-         {
-            self_type tmp = *this;
-            return tmp += offset;
-         }
-
-         self_type operator-(difference_type offset) const
-         {
-            self_type tmp = *this;
-            return tmp -= offset;
-         }
-
-         difference_type operator-(self_type const & other) const
-         {
-            assert(compatible(other));
-            return (index - other.index);
-         }
-
-         bool operator<(self_type const & other) const
-         {
-            assert(compatible(other));
-            return index < other.index;
-         }
-
-         bool operator>(self_type const & other) const
-         {
-            return other < *this;
-         }
-
-         bool operator<=(self_type const & other) const
-         {
-            return !(other < *this);
-         }
-
-         bool operator>=(self_type const & other) const
-         {
-            return !(*this < other);
-         }
-
-         self_type & operator+=(difference_type const offset)
-         {
-            if (static_cast<difference_type>(index) + offset < 0 ||
-               static_cast<difference_type>(index) + offset > 16)
-               throw std::out_of_range("Iterator cannot be incremented outside data bounds.");
-
-            index += offset;
-            return *this;
-         }
-
-         self_type & operator-=(difference_type const offset)
-         {
-            return *this += -offset;
-         }
-
-         value_type const & operator[](difference_type const offset) const
-         {
-            return (*(*this + offset));
-         }
-      };
-
       using value_type = uint8_t;
 
    public:
@@ -499,8 +342,6 @@ namespace uuids
             return uuid_version::none;
       }
 
-      constexpr std::size_t size() const noexcept { return 16; }
-
       constexpr bool is_nil() const noexcept
       {
          for (size_t i = 0; i < data.size(); ++i) if (data[i] != 0) return false;
@@ -512,38 +353,97 @@ namespace uuids
          data.swap(other.data);
       }
 
-      constexpr uuid_const_iterator begin() const noexcept { return uuid_const_iterator(&data[0], 0); }
-      constexpr uuid_const_iterator end() const noexcept { return uuid_const_iterator(&data[0], 16); }
-
       inline gsl::span<std::byte const, 16> as_bytes() const
       {
          return gsl::span<std::byte const, 16>(reinterpret_cast<std::byte const*>(data.data()), 16);
       }
 
-      template <typename TChar>
-      static uuid from_string(TChar const * const str, size_t const size)
+      template<class CharT = char>
+      static bool is_valid_uuid(CharT const * str) noexcept
       {
-         TChar digit = 0;
+         CharT digit = 0;
          bool firstDigit = true;
          int hasBraces = 0;
          size_t index = 0;
-         std::array<uint8_t, 16> data{ { 0 } };
+         size_t size = 0;
+         if constexpr(std::is_same_v<CharT, char>)
+            size = strlen(str);
+         else
+            size = wcslen(str);
 
-         if (str == nullptr || size == 0)
-            throw uuid_error{ "Wrong uuid format" };
+         if (str == nullptr || size == 0) 
+            return false;
 
-         if (str[0] == static_cast<TChar>('{'))
+         if (str[0] == static_cast<CharT>('{'))
             hasBraces = 1;
-         if (hasBraces && str[size - 1] != static_cast<TChar>('}'))
-            throw uuid_error{ "Wrong uuid format" };
+         if (hasBraces && str[size - 1] != static_cast<CharT>('}'))
+            return false;
 
          for (size_t i = hasBraces; i < size - hasBraces; ++i)
          {
-            if (str[i] == static_cast<TChar>('-')) continue;
+            if (str[i] == static_cast<CharT>('-')) continue;
 
             if (index >= 16 || !detail::is_hex(str[i]))
             {
-               throw uuid_error{ "Wrong uuid format" };
+               return false;
+            }
+
+            if (firstDigit)
+            {
+               firstDigit = false;
+            }
+            else
+            {
+               index++;
+               firstDigit = true;
+            }
+         }
+
+         if (index < 16)
+         {
+            return false;
+         }
+
+         return true;
+      }
+
+      template<class CharT = char,
+         class Traits = std::char_traits<CharT>,
+         class Allocator = std::allocator<CharT>>
+      static bool is_valid_uuid(std::basic_string<CharT, Traits, Allocator>& str) noexcept
+      {
+         return is_valid_uuid(str.c_str());
+      }
+
+      template<class CharT = char>
+      static std::optional<uuid> from_string(CharT const * str) noexcept
+      {
+         CharT digit = 0;
+         bool firstDigit = true;
+         int hasBraces = 0;
+         size_t index = 0;
+         size_t size = 0;
+         if constexpr(std::is_same_v<CharT, char>)
+            size = strlen(str);
+         else
+            size = wcslen(str);
+
+         std::array<uint8_t, 16> data{ { 0 } };
+
+         if (str == nullptr || size == 0) return {};
+
+         if (str[0] == static_cast<CharT>('{'))
+            hasBraces = 1;
+         if (hasBraces && str[size - 1] != static_cast<CharT>('}'))
+            return {};
+
+         for (size_t i = hasBraces; i < size - hasBraces; ++i)
+         {
+            if (str[i] == static_cast<CharT>('-')) continue;
+
+            if (index >= 16 || !detail::is_hex(str[i]))
+            {
+               return {};
             }
 
             if (firstDigit)
@@ -560,20 +460,18 @@ namespace uuids
 
          if (index < 16)
          {
-            throw uuid_error{ "Wrong uuid format" };
+            return {};
          }
 
          return uuid{ std::cbegin(data), std::cend(data) };
       }
 
-      static uuid from_string(std::string_view str)
+      template<class CharT = char, 
+               class Traits = std::char_traits<CharT>,
+               class Allocator = std::allocator<CharT>>
+      static std::optional<uuid> from_string(std::basic_string<CharT, Traits, Allocator>& str) noexcept
       {
-         return from_string(str.data(), str.size());
-      }
-
-      static uuid from_string(std::wstring_view str)
-      {
-         return from_string(str.data(), str.size());
+         return from_string(str.c_str());
       }
 
    private:
@@ -627,16 +525,12 @@ namespace uuids
          << std::setw(2) << (int)id.data[15];
    }
 
-   inline std::string to_string(uuid const & id)
+   template<class CharT = char,
+            class Traits = std::char_traits<CharT>,
+            class Allocator = std::allocator<CharT>>
+   inline std::basic_string<CharT, Traits, Allocator> to_string(uuid const & id)
    {
-      std::stringstream sstr;
-      sstr << id;
-      return sstr.str();
-   }
-
-   inline std::wstring to_wstring(uuid const & id)
-   {
-      std::wstringstream sstr;
+      std::basic_stringstream<CharT, Traits, Allocator> sstr;
       sstr << id;
       return sstr.str();
    }
@@ -745,18 +639,11 @@ namespace uuids
    class basic_uuid_random_generator 
    {
    public:
-      using result_type = uuid;
+      using engine_type = UniformRandomNumberGenerator;
 
-      basic_uuid_random_generator()
-         :generator(new UniformRandomNumberGenerator)
-      {
-         std::random_device rd;
-         generator->seed(rd());
-      }
-
-      explicit basic_uuid_random_generator(UniformRandomNumberGenerator& gen) :
+      explicit basic_uuid_random_generator(engine_type& gen) :
          generator(&gen, [](auto) {}) {}
-      explicit basic_uuid_random_generator(UniformRandomNumberGenerator* gen) :
+      explicit basic_uuid_random_generator(engine_type* gen) :
          generator(gen, [](auto) {}) {}
 
       uuid operator()()
@@ -786,8 +673,6 @@ namespace uuids
    class uuid_name_generator
    {
    public:
-      using result_type = uuid;
-
       explicit uuid_name_generator(uuid const& namespace_uuid) noexcept
          : nsuuid(namespace_uuid)
       {}
@@ -810,8 +695,9 @@ namespace uuids
       void reset() 
       {
          hasher.reset();
-         uint8_t bytes[16];
-         std::copy(std::begin(nsuuid), std::end(nsuuid), bytes);
+         std::byte bytes[16];
+         auto nsbytes = nsuuid.as_bytes();
+         std::copy(std::cbegin(nsbytes), std::cend(nsbytes), bytes);
          hasher.process_bytes(bytes, 16);
       }
       
