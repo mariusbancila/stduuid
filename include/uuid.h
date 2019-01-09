@@ -410,7 +410,7 @@ namespace uuids
       template<class CharT = char,
          class Traits = std::char_traits<CharT>,
          class Allocator = std::allocator<CharT>>
-      static bool is_valid_uuid(std::basic_string<CharT, Traits, Allocator>& str) noexcept
+      static bool is_valid_uuid(std::basic_string<CharT, Traits, Allocator> const & str) noexcept
       {
          return is_valid_uuid(str.c_str());
       }
@@ -469,7 +469,7 @@ namespace uuids
       template<class CharT = char, 
                class Traits = std::char_traits<CharT>,
                class Allocator = std::allocator<CharT>>
-      static std::optional<uuid> from_string(std::basic_string<CharT, Traits, Allocator>& str) noexcept
+      static std::optional<uuid> from_string(std::basic_string<CharT, Traits, Allocator> const & str) noexcept
       {
          return from_string(str.c_str());
       }
@@ -677,14 +677,24 @@ namespace uuids
          : nsuuid(namespace_uuid)
       {}
 
-      uuid operator()(std::string_view name)
+      template<class CharT = char>
+      uuid operator()(CharT const * name)
       {
+         size_t size = 0;
+         if constexpr (std::is_same_v<CharT, char>)
+            size = strlen(name);
+         else
+            size = wcslen(name);
+
          reset();
-         process_characters(name.data(), name.size());
+         process_characters(name, size);
          return make_uuid();
       }
 
-      uuid operator()(std::wstring_view name)
+      template<class CharT = char,
+         class Traits = std::char_traits<CharT>,
+         class Allocator = std::allocator<CharT>>
+      uuid operator()(std::basic_string<CharT, Traits, Allocator> const & name)
       {
          reset();
          process_characters(name.data(), name.size());
@@ -739,7 +749,7 @@ namespace uuids
    private:
       uuid nsuuid;
       detail::sha1 hasher;
-   }; 
+   };
 }
 
 namespace std

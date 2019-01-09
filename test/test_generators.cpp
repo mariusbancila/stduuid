@@ -154,7 +154,7 @@ TEST_CASE("Test basic random generator (conversion ctor w/ ref) w/ ranlux48_base
    REQUIRE(id1 != id2);
 }
 
-TEST_CASE("Test name generator", "[gen][name]")
+TEST_CASE("Test name generator (char*)", "[gen][name]")
 {
    uuids::uuid_name_generator dgen(uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43").value());
    auto id1 = dgen("john");
@@ -173,6 +173,36 @@ TEST_CASE("Test name generator", "[gen][name]")
    REQUIRE(id3.variant() == uuids::uuid_variant::rfc);
 
    auto id4 = dgen(L"jane");
+   REQUIRE(!id4.is_nil());
+   REQUIRE(id4.version() == uuids::uuid_version::name_based_sha1);
+   REQUIRE(id4.variant() == uuids::uuid_variant::rfc);
+
+   REQUIRE(id1 != id2);
+   REQUIRE(id2 == id3);
+   REQUIRE(id3 != id4);
+}
+
+TEST_CASE("Test name generator (std::string)", "[gen][name]")
+{
+   using namespace std::string_literals;
+
+   uuids::uuid_name_generator dgen(uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43").value());
+   auto id1 = dgen("john"s);
+   REQUIRE(!id1.is_nil());
+   REQUIRE(id1.version() == uuids::uuid_version::name_based_sha1);
+   REQUIRE(id1.variant() == uuids::uuid_variant::rfc);
+
+   auto id2 = dgen("jane"s);
+   REQUIRE(!id2.is_nil());
+   REQUIRE(id2.version() == uuids::uuid_version::name_based_sha1);
+   REQUIRE(id2.variant() == uuids::uuid_variant::rfc);
+
+   auto id3 = dgen("jane"s);
+   REQUIRE(!id3.is_nil());
+   REQUIRE(id3.version() == uuids::uuid_version::name_based_sha1);
+   REQUIRE(id3.variant() == uuids::uuid_variant::rfc);
+
+   auto id4 = dgen(L"jane"s);
    REQUIRE(!id4.is_nil());
    REQUIRE(id4.version() == uuids::uuid_version::name_based_sha1);
    REQUIRE(id4.variant() == uuids::uuid_variant::rfc);
