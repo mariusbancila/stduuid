@@ -211,3 +211,25 @@ TEST_CASE("Test name generator (std::string)", "[gen][name]")
    REQUIRE(id2 == id3);
    REQUIRE(id3 != id4);
 }
+
+TEST_CASE("Test time generator", "[gen][time]")
+{
+   uuid_time_generator gen;
+   auto id1 = gen();
+   auto id2 = gen();
+   REQUIRE(!id1.is_nil());
+   REQUIRE(id1.variant() == uuids::uuid_variant::rfc);
+   REQUIRE(id1.version() == uuids::uuid_version::time_based);
+
+   REQUIRE(!id2.is_nil());
+   REQUIRE(id2.variant() == uuids::uuid_variant::rfc);
+   REQUIRE(id2.version() == uuids::uuid_version::time_based);
+
+   REQUIRE(id1 != id2);
+
+   std::set<uuids::uuid> ids;
+   for (int i = 0; i < 1000; ++i)
+      ids.insert(gen());
+
+   REQUIRE(ids.size() == 1000);
+}

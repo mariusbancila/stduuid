@@ -12,11 +12,20 @@
 #include <functional>
 #include <type_traits>
 #include <optional>
-#include <assert.h>
+#include <chrono>
+#include <numeric>
 #include <gsl/span>
 
 #ifdef _WIN32
 #include <objbase.h>
+
+#define WIN32_LEAN_AND_MEAN        
+#define NOMINMAX
+#include <windows.h>
+#include <intrin.h>       
+#include <iphlpapi.h> 
+#pragma comment(lib, "IPHLPAPI.lib")
+
 #elif defined(__linux__) || defined(__unix__)
 #include <uuid/uuid.h>
 #elif defined(__APPLE__)
@@ -749,6 +758,94 @@ namespace uuids
    private:
       uuid nsuuid;
       detail::sha1 hasher;
+   };
+
+   // this implementation is currently unreliable for good uuids
+   class uuid_time_generator
+   {
+      using mac_address = std::array<unsigned char, 6>;
+
+      std::optional<mac_address> device_address;
+      std::mt19937 generator;
+      std::uniform_int_distribution<short> dis;
+
+      bool get_mac_address()
+      {         
+         if (device_address.has_value())
+         {
+            return true;
+         }
+         
+#ifdef _WIN32
+         DWORD len = 0;
+         auto ret = GetAdaptersInfo(nullptr, &len);
+         if (ret != ERROR_BUFFER_OVERFLOW) return false;
+         std::vector<unsigned char> buf(len);
+         auto pips = reinterpret_cast<PIP_ADAPTER_INFO>(&buf.front());
+         ret = GetAdaptersInfo(pips, &len);
+         if (ret != ERROR_SUCCESS) return false;
+         mac_address addr;
+         std::copy(pips->Address, pips->Address + 6, std::begin(addr));
+         device_address = addr;
+#endif
+
+         return device_address.has_value();
+      }
+
+      long long get_time_intervals()
+      {
+         auto start = std::chrono::system_clock::from_time_t(-12219292800);
+         auto diff = std::chrono::system_clock::now() - start;
+         auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count();
+         return ns / 100;
+      }
+
+   public:
+      uuid_time_generator():dis(-32768, 32767)
+      {
+         std::random_device rd;
+         auto seed_data = std::array<int, std::mt19937::state_size> {};
+         std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+         std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+         generator.seed(seq);
+      }
+
+      uuid operator()()
+      {
+         if (get_mac_address())
+         {
+            std::array<uuids::uuid::value_type, 16> data;
+
+            auto tm = get_time_intervals();
+
+            short clock_seq = dis(generator);
+
+            clock_seq &= 0x3FFF;
+
+            auto ptm = reinterpret_cast<uuids::uuid::value_type*>(&tm);
+            ptm[0] &= 0x0F;
+
+            memcpy(&data[0], ptm + 4, 4);
+            memcpy(&data[4], ptm + 2, 2);
+            memcpy(&data[6], ptm, 2);
+
+            memcpy(&data[8], reinterpret_cast<uuids::uuid::value_type*>(&clock_seq), 2);
+
+            // variant must be 0b10xxxxxx
+            data[8] &= 0xBF;
+            data[8] |= 0x80;
+
+            // version must be 0b0001xxxx
+            data[6] &= 0x5F;
+            data[6] |= 0x10;
+
+            memcpy(&data[10], &device_address.value()[0], 6);
+
+            return uuids::uuid{std::cbegin(data), std::cend(data)};
+         }
+
+         return {};
+      }
    };
 }
 
