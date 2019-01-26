@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.7.0)
 project(test_uuid CXX)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/catch)
+OPTION (BUILD_TESTS "Build test" OFF)
 
-file(GLOB headers ${CMAKE_SOURCE_DIR}/include/*.h)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/include)
+include_directories(${CMAKE_CURRENT_LIST_DIR}/catch)
+
+file(GLOB headers ${CMAKE_CURRENT_LIST_DIR}/include/*.h)
 file(GLOB SOURCES "test/*.cpp" "include/*.cpp")
 
 if(BUILD_TESTS)
