@@ -304,11 +304,11 @@ namespace uuids
       name_based_sha1 = 5   // The name-based version specified in RFS 4122 with SHA1 hashing
    };
 
-   struct uuid
+   class uuid
    {
+   public:
       using value_type = uint8_t;
 
-   public:
       constexpr uuid() noexcept : data({}) {};
 
       explicit uuid(gsl::span<value_type, 16> bytes)
@@ -544,7 +544,7 @@ namespace uuids
       return sstr.str();
    }
 
-   inline void swap(uuids::uuid & lhs, uuids::uuid & rhs)
+   inline void swap(uuids::uuid & lhs, uuids::uuid & rhs) noexcept
    {
       lhs.swap(rhs);
    }
