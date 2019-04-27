@@ -28,6 +28,10 @@
 
 #elif defined(__linux__) || defined(__unix__)
 #include <uuid/uuid.h>
+#include <net/if.h>
+#include <netinet/in.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
 #elif defined(__APPLE__)
 #include <CoreFoundation/CFUUID.h>
 #endif
@@ -242,7 +246,62 @@ namespace uuids
          size_t m_blockByteIndex;
          size_t m_byteCount;
       };
-   }
+
+#ifdef _WIN32
+      using addr_byte_t = unsigned char;
+#elif defined(__linux__) || defined(__unix__)
+      using addr_byte_t = char;
+#endif
+      static constexpr uint8_t k_phyAddrSize {6u};
+      using mac_address_t = std::array<addr_byte_t, k_phyAddrSize>;
+      
+      inline std::optional<detail::mac_address_t> get_first_phy_addr()
+      {
+         mac_address_t addr{};
+         addr_byte_t* addr_begin{nullptr};
+#ifdef _WIN32
+         DWORD len = 0;
+         auto ret = GetAdaptersInfo(nullptr, &len);
+         if (ret != ERROR_BUFFER_OVERFLOW) return {};
+         std::vector<unsigned char> buf(len);
+         auto pips = reinterpret_cast<PIP_ADAPTER_INFO>(&buf.front());
+         ret = GetAdaptersInfo(pips, &len);
+         if (ret != ERROR_SUCCESS) return {};
+         addr_begin = pips->Address;
+#elif defined(__linux__) || defined(__unix__) // can this work for __APPLE__ as well?
+         int sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+         if (sock == -1) return {};
+         std::array<char, 1024> buf; // find a better solution
+         struct ifconf ifc;
+         ifc.ifc_len = buf.size();
+         ifc.ifc_buf = buf.data();
+         if (ioctl(sock, SIOCGIFCONF, &ifc) == -1)
+         {
+            close(sock);
+            return {};
+         }
+         struct ifreq *it = ifc.ifc_req;
+         struct ifreq const *const end = it + (ifc.ifc_len / sizeof(struct ifreq));
+         struct ifreq ifr;
+         for (; it != end; ++it) {
+            std::strcpy(ifr.ifr_name, it->ifr_name);
+            if (ioctl(sock, SIOCGIFFLAGS, &ifr) != 0) {
+               close(sock);
+               return {};
+            }
+            if (ifr.ifr_flags & IFF_LOOPBACK) // don't count loopback
+               continue;
+            if (ioctl(sock, SIOCGIFHWADDR, &ifr) == 0) {
+               addr_begin = ifr.ifr_hwaddr.sa_data;
+               break;
+            }
+         }
+         close(sock);
+#endif
+         std::copy_n(addr_begin, addr.size(), addr.begin());
+         return addr;
+      }
+   } // namespace detail
 
    // UUID format https://tools.ietf.org/html/rfc4122
    // Field	                     NDR Data Type	   Octet #	Note
@@ -763,32 +822,15 @@ namespace uuids
    // this implementation is currently unreliable for good uuids
    class uuid_time_generator
    {
-      using mac_address = std::array<unsigned char, 6>;
-
-      std::optional<mac_address> device_address;
+      std::optional<detail::mac_address_t> device_address;
       std::mt19937 generator;
       std::uniform_int_distribution<short> dis;
 
       bool get_mac_address()
       {         
          if (device_address.has_value())
-         {
             return true;
-         }
-         
-#ifdef _WIN32
-         DWORD len = 0;
-         auto ret = GetAdaptersInfo(nullptr, &len);
-         if (ret != ERROR_BUFFER_OVERFLOW) return false;
-         std::vector<unsigned char> buf(len);
-         auto pips = reinterpret_cast<PIP_ADAPTER_INFO>(&buf.front());
-         ret = GetAdaptersInfo(pips, &len);
-         if (ret != ERROR_SUCCESS) return false;
-         mac_address addr;
-         std::copy(pips->Address, pips->Address + 6, std::begin(addr));
-         device_address = addr;
-#endif
-
+         device_address = detail::get_first_phy_addr();
          return device_address.has_value();
       }
 
