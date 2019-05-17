@@ -228,8 +228,8 @@ TEST_CASE("Test time generator", "[gen][time]")
    REQUIRE(id1 != id2);
 
    std::set<uuids::uuid> ids;
-   for (int i = 0; i < 1000; ++i)
+   for (int i = 0; i < 100; ++i)
       ids.insert(gen());
 
-   REQUIRE(ids.size() == 1000);
+   REQUIRE(ids.size() == 100);
 }
