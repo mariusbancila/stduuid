@@ -14,6 +14,7 @@
 #include <optional>
 #include <chrono>
 #include <numeric>
+#include <atomic>
 #include <gsl/span>
 
 #ifdef _WIN32
@@ -242,6 +243,10 @@ namespace uuids
          size_t m_blockByteIndex;
          size_t m_byteCount;
       };
+
+      static std::mt19937 clock_gen(std::random_device{}());
+      static std::uniform_int_distribution<short> clock_dis{ -32768, 32767 };
+      static std::atomic_short clock_sequence = clock_dis(clock_gen);
    }
 
    // --------------------------------------------------------------------------------------------------------------------------
@@ -805,14 +810,13 @@ namespace uuids
       detail::sha1 hasher;
    };
 
-   // this implementation is currently unreliable for good uuids
+   // !!! DO NOT USE THIS IN PRODUCTION
+   // this implementation is unreliable for good uuids
    class uuid_time_generator
    {
       using mac_address = std::array<unsigned char, 6>;
 
       std::optional<mac_address> device_address;
-      std::mt19937 generator;
-      std::uniform_int_distribution<short> dis;
 
       bool get_mac_address()
       {         
@@ -846,13 +850,8 @@ namespace uuids
       }
 
    public:
-      uuid_time_generator():dis(-32768, 32767)
+      uuid_time_generator()
       {
-         std::random_device rd;
-         auto seed_data = std::array<int, std::mt19937::state_size> {};
-         std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
-         std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
-         generator.seed(seq);
       }
 
       uuid operator()()
@@ -863,7 +862,7 @@ namespace uuids
 
             auto tm = get_time_intervals();
 
-            short clock_seq = dis(generator);
+            short clock_seq = detail::clock_sequence++;
 
             clock_seq &= 0x3FFF;
 

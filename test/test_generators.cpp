@@ -220,6 +220,7 @@ TEST_CASE("Test name generator (std::string)", "[gen][name]")
    REQUIRE(id3 != id4);
 }
 
+#ifdef _WIN32
 TEST_CASE("Test time generator", "[gen][time]")
 {
    uuid_time_generator gen;
@@ -241,3 +242,4 @@ TEST_CASE("Test time generator", "[gen][time]")
 
    REQUIRE(ids.size() == 100);
 }
+#endif
