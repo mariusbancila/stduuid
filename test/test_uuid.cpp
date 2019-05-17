@@ -335,6 +335,46 @@ TEST_CASE("Test iterators constructor", "[ctors]")
    }
 }
 
+TEST_CASE("Test array constructors", "[ctors]")
+{
+   using namespace std::string_literals;
+
+   {
+      uuids::uuid guid{
+         {0x47, 0x18, 0x38, 0x23,
+          0x25, 0x74,
+          0x4b, 0xfd,
+          0xb4, 0x11,
+          0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 } };
+
+      REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+   }
+
+   {
+      std::array<uuids::uuid::value_type, 16> arr{ {
+            0x47, 0x18, 0x38, 0x23,
+            0x25, 0x74,
+            0x4b, 0xfd,
+            0xb4, 0x11,
+            0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 } };
+
+      uuid guid(arr);
+      REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+   }
+
+   {
+      uuids::uuid::value_type arr[16] {
+            0x47, 0x18, 0x38, 0x23,
+            0x25, 0x74,
+            0x4b, 0xfd,
+            0xb4, 0x11,
+            0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 };
+
+      uuid guid(arr);
+      REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43"s);
+   }
+}
+
 TEST_CASE("Test equality", "[operators]")
 {
    uuid empty;

@@ -244,7 +244,11 @@ namespace uuids
       };
    }
 
+   // --------------------------------------------------------------------------------------------------------------------------
    // UUID format https://tools.ietf.org/html/rfc4122
+   // --------------------------------------------------------------------------------------------------------------------------
+
+   // --------------------------------------------------------------------------------------------------------------------------
    // Field	                     NDR Data Type	   Octet #	Note
    // --------------------------------------------------------------------------------------------------------------------------
    // time_low	                  unsigned long	   0 - 3	   The low field of the timestamp.
@@ -265,6 +269,10 @@ namespace uuids
    // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    // |                         node (2-5)                            |
    // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+   // --------------------------------------------------------------------------------------------------------------------------
+   // enumerations
+   // --------------------------------------------------------------------------------------------------------------------------
 
    // indicated by a bit pattern in octet 8, marked with N in xxxxxxxx-xxxx-xxxx-Nxxx-xxxxxxxxxxxx
    enum class uuid_variant
@@ -293,7 +301,7 @@ namespace uuids
       reserved
    };
 
-   // indicated by a bit pattern in octet 6, marked with M in xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx
+   // indicated by a bit pattern in octet 6, marked with M in xxxxxxxx-xxxx-Mxxx-xxxx-xxxxxxxxxxxx   
    enum class uuid_version
    {
       none = 0, // only possible for nil or invalid uuids
@@ -304,12 +312,25 @@ namespace uuids
       name_based_sha1 = 5   // The name-based version specified in RFS 4122 with SHA1 hashing
    };
 
+   // --------------------------------------------------------------------------------------------------------------------------
+   // uuid class
+   // --------------------------------------------------------------------------------------------------------------------------
    class uuid
    {
    public:
       using value_type = uint8_t;
 
       constexpr uuid() noexcept : data({}) {};
+
+      uuid(value_type(&arr)[16]) noexcept
+      {
+         std::copy(std::cbegin(arr), std::cend(arr), std::begin(data));
+      }
+
+      uuid(std::array<value_type, 16> const & arr) noexcept
+      {
+         std::copy(std::cbegin(arr), std::cend(arr), std::begin(data));
+      }
 
       explicit uuid(gsl::span<value_type, 16> bytes)
       {
@@ -493,6 +514,10 @@ namespace uuids
       friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);  
    };
 
+   // --------------------------------------------------------------------------------------------------------------------------
+   // operators and non-member functions
+   // --------------------------------------------------------------------------------------------------------------------------
+
    inline bool operator== (uuid const& lhs, uuid const& rhs) noexcept
    {
       return lhs.data == rhs.data;
@@ -546,8 +571,28 @@ namespace uuids
 
    inline void swap(uuids::uuid & lhs, uuids::uuid & rhs) noexcept
    {
-      lhs.swap(rhs);
+      lhs.swap(rhs);   
    }
+
+   // --------------------------------------------------------------------------------------------------------------------------
+   // namespace IDs that could be used for generating name-based uuids
+   // --------------------------------------------------------------------------------------------------------------------------
+
+   // Name string is a fully-qualified domain name
+   static uuid uuid_namespace_dns{ {0x6b, 0xa7, 0xb8, 0x10, 0x9d, 0xad, 0x11, 0xd1, 0x80, 0xb4, 0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8} };
+
+   // Name string is a URL
+   static uuid uuid_namespace_url{ {0x6b, 0xa7, 0xb8, 0x11, 0x9d, 0xad, 0x11, 0xd1, 0x80, 0xb4, 0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8} };
+
+   // Name string is an ISO OID (See https://oidref.com/, https://en.wikipedia.org/wiki/Object_identifier)
+   static uuid uuid_namespace_oid{ {0x6b, 0xa7, 0xb8, 0x12, 0x9d, 0xad, 0x11, 0xd1, 0x80, 0xb4, 0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8} };
+
+   // Name string is an X.500 DN, in DER or a text output format (See https://en.wikipedia.org/wiki/X.500, https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One)
+   static uuid uuid_namespace_x500{ {0x6b, 0xa7, 0xb8, 0x14, 0x9d, 0xad, 0x11, 0xd1, 0x80, 0xb4, 0x00, 0xc0, 0x4f, 0xd4, 0x30, 0xc8} };
+
+   // --------------------------------------------------------------------------------------------------------------------------
+   // uuid generators
+   // --------------------------------------------------------------------------------------------------------------------------
 
    class uuid_system_generator
    {

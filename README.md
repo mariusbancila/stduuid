@@ -35,6 +35,15 @@ Utilities:
 | `std::swap<>` | specialization of `swap` for `uuid` |
 | `std::hash<>` | specialization of `hash` for `uuid` (necessary for storing UUIDs in unordered associative containers, such as `std::unordered_set`) |
 
+Constants: 
+
+| Name | Description |
+| ---- | ----------- |
+| `uuid_namespace_dns` | Namespace ID for name-based uuids when name string is a fully-qualified domain name. |
+| `uuid_namespace_url` | Namespace ID for name-based uuids when name string is a URL. |
+| `uuid_namespace_oid` | Namespace ID for name-based uuids when mame string is an ISO OID (See https://oidref.com/, https://en.wikipedia.org/wiki/Object_identifier). |
+| `uuid_namespace_x500` | Namespace ID for name-based uuids when name string is an X.500 DN, in DER or a text output format (See https://en.wikipedia.org/wiki/X.500, https://en.wikipedia.org/wiki/Abstract_Syntax_Notation_One). |
+
 Other:
 
 | Name | Description |
@@ -152,6 +161,17 @@ The following is a list of examples for using the library:
      0xb4, 0x11,
      0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43 };
   uuid id(std::begin(arr), std::end(arr));
+  assert(uuids::to_string(id) == "47183823-2574-4bfd-b411-99ed177d3e43");
+  
+  // or 
+  
+  uuids::uuid id{{
+     0x47, 0x18, 0x38, 0x23,
+     0x25, 0x74,
+     0x4b, 0xfd,
+     0xb4, 0x11,
+     0x99, 0xed, 0x17, 0x7d, 0x3e, 0x43}};
+
   assert(uuids::to_string(id) == "47183823-2574-4bfd-b411-99ed177d3e43");
   ```
   

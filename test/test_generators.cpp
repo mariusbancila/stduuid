@@ -154,6 +154,14 @@ TEST_CASE("Test basic random generator (conversion ctor w/ ref) w/ ranlux48_base
    REQUIRE(id1 != id2);
 }
 
+TEST_CASE("Test namespaces", "[gen][name]")
+{
+   REQUIRE(uuid_namespace_dns == uuids::uuid::from_string("6ba7b810-9dad-11d1-80b4-00c04fd430c8"));
+   REQUIRE(uuid_namespace_url == uuids::uuid::from_string("6ba7b811-9dad-11d1-80b4-00c04fd430c8"));
+   REQUIRE(uuid_namespace_oid == uuids::uuid::from_string("6ba7b812-9dad-11d1-80b4-00c04fd430c8"));
+   REQUIRE(uuid_namespace_x500 == uuids::uuid::from_string("6ba7b814-9dad-11d1-80b4-00c04fd430c8"));
+}
+
 TEST_CASE("Test name generator (char*)", "[gen][name]")
 {
    uuids::uuid_name_generator dgen(uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43").value());
