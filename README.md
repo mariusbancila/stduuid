@@ -56,7 +56,7 @@ Other:
 ## Library history
 This library is an implementation of the proposal [P0959](P0959.md).
 
-**As the proposal evolves based on the standard commity and the C++ community feedback, this library implementation will reflect those changes.** 
+**As the proposal evolves based on the standard committee and the C++ community feedback, this library implementation will reflect those changes.** 
 
 See the revision history of the proposal for history of changes.
 
