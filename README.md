@@ -1,5 +1,5 @@
 # stduuid
-A C++ cross-platform single-header library implementation **for universally unique identifiers**, simply know as either UUID or GUID (mostly on Windows). A UUID is a 128-bit number used to uniquely identify information in computer systems, such as database table keys, COM interfaces, classes and type libraries, and many others.
+A C++17 cross-platform single-header library implementation **for universally unique identifiers**, simply know as either UUID or GUID (mostly on Windows). A UUID is a 128-bit number used to uniquely identify information in computer systems, such as database table keys, COM interfaces, classes and type libraries, and many others.
 
 [![Build Status](https://travis-ci.org/mariusbancila/stduuid.svg?branch=master)](https://travis-ci.org/mariusbancila/stduuid)
 [![Tests status](https://ci.appveyor.com/api/projects/status/0kw1n2s2xqxu5m62?svg=true&pendingText=tests%20-%20pending&failingText=tests%20-%20FAILED&passingText=tests%20-%20OK)](https://ci.appveyor.com/project/mariusbancila/stduuid)
