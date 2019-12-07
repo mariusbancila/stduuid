@@ -688,7 +688,7 @@ namespace uuids
                bytes.byte15
             } };
          return uuid{ std::begin(arrbytes), std::end(arrbytes) };
-#elif
+#else
          return uuid{};
 #endif
       }
