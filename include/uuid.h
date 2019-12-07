@@ -18,10 +18,13 @@
 #include <gsl/span>
 
 #ifdef _WIN32
-#include <objbase.h>
-
-#define WIN32_LEAN_AND_MEAN        
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+#include <objbase.h>
 #include <windows.h>
 #include <intrin.h>       
 #include <iphlpapi.h> 
