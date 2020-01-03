@@ -843,7 +843,7 @@ namespace uuids
 
       long long get_time_intervals()
       {
-         auto start = std::chrono::system_clock::from_time_t(-12219292800);
+         auto start = std::chrono::system_clock::from_time_t(time_t(-12219292800));
          auto diff = std::chrono::system_clock::now() - start;
          auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(diff).count();
          return ns / 100;
