@@ -8,6 +8,40 @@
 
 using namespace uuids;
 
+TEST_CASE("Test multiple default generators", "[gen][rand]")
+{
+   uuid id1;
+   uuid id2;
+
+   {
+      std::random_device rd;
+      auto seed_data = std::array<int, std::mt19937::state_size> {};
+      std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+      std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+      std::mt19937 generator(seq);
+
+      id1 = uuids::uuid_random_generator{ generator }();
+      REQUIRE(!id1.is_nil());
+      REQUIRE(id1.version() == uuids::uuid_version::random_number_based);
+      REQUIRE(id1.variant() == uuids::uuid_variant::rfc);
+   }
+
+   {
+      std::random_device rd;
+      auto seed_data = std::array<int, std::mt19937::state_size> {};
+      std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+      std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+      std::mt19937 generator(seq);
+
+      id2 = uuids::uuid_random_generator{ generator }();
+      REQUIRE(!id2.is_nil());
+      REQUIRE(id2.version() == uuids::uuid_version::random_number_based);
+      REQUIRE(id2.variant() == uuids::uuid_variant::rfc);
+   }
+
+   REQUIRE(id1 != id2);
+}
+
 TEST_CASE("Test default generator", "[gen][rand]")
 {
    std::random_device rd;
