@@ -541,7 +541,11 @@ namespace uuids
    template <class Elem, class Traits>
    std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id)
    {
-      return s << std::hex << std::setfill(static_cast<Elem>('0'))
+      // save current flags
+      std::ios_base::fmtflags f(s.flags());
+      
+      // manipulate stream as needed
+      s << std::hex << std::setfill(static_cast<Elem>('0'))
          << std::setw(2) << (int)id.data[0]
          << std::setw(2) << (int)id.data[1]
          << std::setw(2) << (int)id.data[2]
@@ -562,6 +566,11 @@ namespace uuids
          << std::setw(2) << (int)id.data[13]
          << std::setw(2) << (int)id.data[14]
          << std::setw(2) << (int)id.data[15];
+
+      // restore original flags
+      s.flags(f);
+      
+      return s;
    }
 
    template<class CharT = char,
