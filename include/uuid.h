@@ -24,16 +24,28 @@
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
+
+#ifdef UUID_SYSTEM_GENERATOR
 #include <objbase.h>
+#endif
+
 #include <windows.h>
 #include <intrin.h>       
 #include <iphlpapi.h> 
 #pragma comment(lib, "IPHLPAPI.lib")
 
 #elif defined(__linux__) || defined(__unix__)
+
+#ifdef UUID_SYSTEM_GENERATOR
 #include <uuid/uuid.h>
+#endif
+
 #elif defined(__APPLE__)
+
+#ifdef UUID_SYSTEM_GENERATOR
 #include <CoreFoundation/CFUUID.h>
+#endif
+
 #endif
 
 namespace uuids
@@ -611,6 +623,7 @@ namespace uuids
    // uuid generators
    // --------------------------------------------------------------------------------------------------------------------------
 
+#ifdef UUID_SYSTEM_GENERATOR
    class uuid_system_generator
    {
    public:
@@ -705,6 +718,7 @@ namespace uuids
 #endif
       }
    };
+#endif
 
    template <typename UniformRandomNumberGenerator>
    class basic_uuid_random_generator 
