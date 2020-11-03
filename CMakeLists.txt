@@ -1,83 +1,32 @@
 cmake_minimum_required(VERSION 3.7.0)
-project(test_uuid CXX)
+project(stduuid CXX)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/catch)
+option(UUID_BUILD_TESTS "Build the unit tests" ON)
+option(UUID_SYSTEM_GENERATOR "Enable operating system uuid generator" ON)
 
-file(GLOB headers ${CMAKE_SOURCE_DIR}/include/*.h)
-file(GLOB SOURCES "test/*.cpp" "include/*.cpp")
+# Library target
+add_library(${PROJECT_NAME} INTERFACE)
+target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_SOURCE_DIR}/include)
 
-if(BUILD_TESTS)
-   include(CTest)
-endif()
+# Using system uuid generator
+if (UUID_SYSTEM_GENERATOR)
+    target_compile_definitions(${PROJECT_NAME} INTERFACE UUID_SYSTEM_GENERATOR)
 
-if(UUID_SYSTEM_GENERATOR)
-   add_definitions(-DUUID_SYSTEM_GENERATOR)
-endif()
+    if (WIN32)
+    elseif (APPLE)
+        find_library(CFLIB CoreFoundation REQUIRED)
+        target_link_libraries(${PROJECT_NAME} INTERFACE ${CFLIB})
+    else ()
+        find_package(Libuuid REQUIRED)
+        if (Libuuid_FOUND)
+            target_include_directories(${PROJECT_NAME} INTERFACE ${Libuuid_INCLUDE_DIRS})
+            target_link_libraries(${PROJECT_NAME} INTERFACE ${Libuuid_LIBRARIES})
+        endif ()
+    endif ()
+endif ()
 
-if(WIN32)
-   message(status "Setting MSVC flags")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHc /std:c++17")
-   add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-elseif(APPLE)
-   message(status "Setting Clang flags")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fexceptions -g -Wall")
-else()
-   #include_directories(${LIBUUID_INCLUDE_DIR})
-   message(status "Setting GCC flags")
-   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -fexceptions -g -Wall")
-endif()
-
-add_executable(test_uuid ${SOURCES} ${headers})
-
-if(WIN32)
-elseif(APPLE)
-	find_library(CFLIB CoreFoundation)
-	target_link_libraries(test_uuid ${CFLIB})
-else()
-    FIND_PATH(LIBUUID_INCLUDE_DIRS uuid/uuid.h)
-    FIND_LIBRARY(LIBUUID_LIBRARIES uuid)
-
-    IF (LIBUUID_LIBRARIES AND LIBUUID_INCLUDE_DIRS)       
-        SET(LIBUUID_FOUND 1)
-        IF (NOT LibUuid_FIND_QUIETLY)
-            MESSAGE(STATUS "Found libuuid: ${LIBUUID_LIBRARIES}")
-        ENDIF ( NOT LibUuid_FIND_QUIETLY )
-    ELSE (LIBUUID_LIBRARIES AND LIBUUID_INCLUDE_DIRS)     
-        IF (LibUuid_FIND_REQUIRED)
-            MESSAGE(SEND_ERROR "Could NOT find libuuid")
-        ELSE (LibUuid_FIND_REQUIRED)
-            IF (NOT LIBUUID_FIND_QUIETLY)
-                MESSAGE(STATUS "Could NOT find libuuid")     
-            ENDIF (NOT LIBUUID_FIND_QUIETLY)
-        ENDIF (LibUuid_FIND_REQUIRED)
-    ENDIF (LIBUUID_LIBRARIES AND LIBUUID_INCLUDE_DIRS)
-
-    MARK_AS_ADVANCED(LIBUUID_LIBRARIES LIBUUID_INCLUDE_DIRS)
-    
-    include_directories(${LIBUUID_INCLUDE_DIRS})
-
-	#find_package(Libuuid REQUIRED NO_MODULE)
-	#if (NOT LIBUUID_FOUND)
-	#	message(FATAL_ERROR
-    #   "You might need to run 'sudo apt-get install uuid-dev' or similar")
-	#endif()
-	target_link_libraries(test_uuid ${LIBUUID_LIBRARY})
-endif()
-
-message(status "** CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-
-if(BUILD_TESTS)
-    enable_testing()
-
-    add_test(NAME "test_uuid" COMMAND "test_uuid" "-r compact")
-    set_tests_properties("test_uuid"
-        PROPERTIES
-        PASS_REGULAR_EXPRESSION "Passed all.*")
-    set_tests_properties("test_uuid"
-        PROPERTIES
-        FAIL_REGULAR_EXPRESSION "Failed \\d+ test cases")
-    set_tests_properties("test_uuid"
-        PROPERTIES
-        TIMEOUT 120)
-endif()
+# Tests
+if (UUID_BUILD_TESTS)
+    add_subdirectory(test)
+endif ()
