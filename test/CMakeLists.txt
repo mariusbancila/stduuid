@@ -1,5 +1,3 @@
-enable_testing()
-
 # Test target
 add_executable(test_${PROJECT_NAME} main.cpp test_generators.cpp test_uuid.cpp)
 target_include_directories(test_${PROJECT_NAME} PRIVATE ${PROJECT_SOURCE_DIR}/catch)
