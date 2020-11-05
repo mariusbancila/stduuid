@@ -8,7 +8,9 @@ option(UUID_USING_CXX20_SPAN "Using span from std instead of gsl" OFF)
 
 # Library target
 add_library(${PROJECT_NAME} INTERFACE)
-target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} INTERFACE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
 
 # Using system uuid generator
 if (UUID_SYSTEM_GENERATOR)
@@ -29,8 +31,34 @@ endif ()
 
 # Using span from std
 if (NOT UUID_USING_CXX20_SPAN)
-    target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_SOURCE_DIR}/gsl)
+    target_include_directories(${PROJECT_NAME} INTERFACE
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gsl>
+            $<INSTALL_INTERFACE:include/gsl>)
+    install(DIRECTORY gsl TYPE INCLUDE)
 endif ()
+
+# Install step and imported target
+install(FILES include/uuid.h TYPE INCLUDE)
+install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
+install(EXPORT ${PROJECT_NAME}-targets
+        DESTINATION lib/cmake/${PROJECT_NAME})
+
+# Config files for find_package()
+include(CMakePackageConfigHelpers)
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Config.cmake.in
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+        INSTALL_DESTINATION lib/cmake/${PROJECT_NAME})
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-version.cmake"
+        VERSION "1.0"
+        COMPATIBILITY AnyNewerVersion)
+install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-version.cmake"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/FindLibuuid.cmake"
+        DESTINATION lib/cmake/${PROJECT_NAME})
+export(EXPORT ${PROJECT_NAME}-targets
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/cmake/${PROJECT_NAME}-targets.cmake")
 
 # Tests
 if (UUID_BUILD_TESTS)
