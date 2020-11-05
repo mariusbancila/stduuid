@@ -15,7 +15,7 @@
 #include <chrono>
 #include <numeric>
 #include <atomic>
-#include <gsl/span>
+#include <span>
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -50,6 +50,14 @@
 
 namespace uuids
 {
+#ifdef __cpp_lib_span
+   template <class ElementType, std::size_t Extent>
+   using span = std::span<ElementType, Extent>;
+#else
+   template <class ElementType, std::ptrdiff_t Extent>
+   using span = gsl::span<ElementType, Extent>;
+#endif
+
    namespace detail
    {
       template <typename TChar>
@@ -352,7 +360,7 @@ namespace uuids
          std::copy(std::cbegin(arr), std::cend(arr), std::begin(data));
       }
 
-      explicit uuid(gsl::span<value_type, 16> bytes)
+      explicit uuid(span<value_type, 16> bytes)
       {
          std::copy(std::cbegin(bytes), std::cend(bytes), std::begin(data));
       }
@@ -403,9 +411,9 @@ namespace uuids
          data.swap(other.data);
       }
 
-      inline gsl::span<std::byte const, 16> as_bytes() const
+      inline span<std::byte const, 16> as_bytes() const
       {
-         return gsl::span<std::byte const, 16>(reinterpret_cast<std::byte const*>(data.data()), 16);
+         return span<std::byte const, 16>(reinterpret_cast<std::byte const*>(data.data()), 16);
       }
 
       template<class CharT = char>
