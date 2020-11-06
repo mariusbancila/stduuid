@@ -2,12 +2,10 @@
 
 include(CMakeFindDependencyMacro)
 if (@UUID_SYSTEM_GENERATOR@)
-    if (WIN32)
-    elseif (APPLE)
-        find_dependency(CoreFoundation)
+    if (WIN32 OR APPLE)
     else ()
         list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
-        find_dependency(Libuuid)
+        find_dependency(Libuuid REQUIRED)
     endif ()
 endif ()
 
