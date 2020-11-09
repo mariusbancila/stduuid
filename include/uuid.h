@@ -411,7 +411,6 @@ namespace uuids
       template<class CharT = char>
       static bool is_valid_uuid(CharT const * str) noexcept
       {
-         CharT digit = 0;
          bool firstDigit = true;
          int hasBraces = 0;
          size_t index = 0;
