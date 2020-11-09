@@ -34,11 +34,11 @@ if (NOT UUID_USING_CXX20_SPAN)
     target_include_directories(${PROJECT_NAME} INTERFACE
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gsl>
             $<INSTALL_INTERFACE:include/gsl>)
-    install(DIRECTORY gsl TYPE INCLUDE)
+    install(DIRECTORY gsl DESTINATION include)
 endif ()
 
 # Install step and imported target
-install(FILES include/uuid.h TYPE INCLUDE)
+install(FILES include/uuid.h DESTINATION include)
 install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
 install(EXPORT ${PROJECT_NAME}-targets
         DESTINATION lib/cmake/${PROJECT_NAME})
