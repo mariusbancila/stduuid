@@ -168,30 +168,30 @@ namespace uuids
             digest32_t d32;
             get_digest(d32);
             size_t di = 0;
-            digest[di++] = ((d32[0] >> 24) & 0xFF);
-            digest[di++] = ((d32[0] >> 16) & 0xFF);
-            digest[di++] = ((d32[0] >> 8) & 0xFF);
-            digest[di++] = ((d32[0]) & 0xFF);
+            digest[di++] = (uint8_t)(d32[0] >> 24);
+            digest[di++] = (uint8_t)(d32[0] >> 16);
+            digest[di++] = (uint8_t)(d32[0] >>  8);
+            digest[di++] = (uint8_t)(d32[0] >>  0);
 
-            digest[di++] = ((d32[1] >> 24) & 0xFF);
-            digest[di++] = ((d32[1] >> 16) & 0xFF);
-            digest[di++] = ((d32[1] >> 8) & 0xFF);
-            digest[di++] = ((d32[1]) & 0xFF);
+            digest[di++] = (uint8_t)(d32[1] >> 24);
+            digest[di++] = (uint8_t)(d32[1] >> 16);
+            digest[di++] = (uint8_t)(d32[1] >>  8);
+            digest[di++] = (uint8_t)(d32[1] >>  0);
 
-            digest[di++] = ((d32[2] >> 24) & 0xFF);
-            digest[di++] = ((d32[2] >> 16) & 0xFF);
-            digest[di++] = ((d32[2] >> 8) & 0xFF);
-            digest[di++] = ((d32[2]) & 0xFF);
+            digest[di++] = (uint8_t)(d32[2] >> 24);
+            digest[di++] = (uint8_t)(d32[2] >> 16);
+            digest[di++] = (uint8_t)(d32[2] >>  8);
+            digest[di++] = (uint8_t)(d32[2] >>  0);
 
-            digest[di++] = ((d32[3] >> 24) & 0xFF);
-            digest[di++] = ((d32[3] >> 16) & 0xFF);
-            digest[di++] = ((d32[3] >> 8) & 0xFF);
-            digest[di++] = ((d32[3]) & 0xFF);
+            digest[di++] = (uint8_t)(d32[3] >> 24);
+            digest[di++] = (uint8_t)(d32[3] >> 16);
+            digest[di++] = (uint8_t)(d32[3] >>  8);
+            digest[di++] = (uint8_t)(d32[3] >>  0);
 
-            digest[di++] = ((d32[4] >> 24) & 0xFF);
-            digest[di++] = ((d32[4] >> 16) & 0xFF);
-            digest[di++] = ((d32[4] >> 8) & 0xFF);
-            digest[di++] = ((d32[4]) & 0xFF);
+            digest[di++] = (uint8_t)(d32[4] >> 24);
+            digest[di++] = (uint8_t)(d32[4] >> 16);
+            digest[di++] = (uint8_t)(d32[4] >>  8);
+            digest[di++] = (uint8_t)(d32[4] >>  0);
 
             return digest;
          }
