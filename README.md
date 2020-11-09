@@ -86,11 +86,11 @@ The following is a list of examples for using the library:
   std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
   std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
   std::mt19937 generator(seq);
-  uuid const guid = uuids::uuid_random_generator{generator}();
+  uuids::uuid_random_generator gen{generator};
 
   uuid const id = gen();
   assert(!id.is_nil());
-  assert(id.size() == 16);
+  assert(id.as_bytes().size() == 16);
   assert(id.version() == uuids::uuid_version::random_number_based);
   assert(id.variant() == uuids::uuid_variant::rfc);
   ```
@@ -107,7 +107,7 @@ The following is a list of examples for using the library:
   uuids::basic_uuid_random_generator<std::ranlux48_base> gen(&generator);
   uuid const id = gen();
   assert(!id.is_nil());
-  assert(id.size() == 16);
+  assert(id.as_bytes().size() == 16);
   assert(id.version() == uuids::uuid_version::random_number_based);
   assert(id.variant() == uuids::uuid_variant::rfc);
   ```
@@ -116,7 +116,7 @@ The following is a list of examples for using the library:
 
   ```cpp
   uuids::uuid_name_generator gen(uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43").value());
-  uuid const id = gen();
+  uuid const id = gen("john");
 
   assert(!id.is_nil());
   assert(id.version() == uuids::uuid_version::name_based_sha1);
@@ -126,8 +126,6 @@ The following is a list of examples for using the library:
 * Create a UUID from a string
 
   ```cpp
-  using namespace std::string_literals;
-
   auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
   auto id = uuids::uuid::from_string(str);
   assert(id.has_value());
@@ -135,8 +133,9 @@ The following is a list of examples for using the library:
 
   // or
 
-  uuid id = uuids::uuid::from_string(L"{47183823-2574-4bfd-b411-99ed177d3e43}"s).value();
-  assert(uuids::to_string<wchar_t>(id.value()) == str);
+  auto str = L"47183823-2574-4bfd-b411-99ed177d3e43"s;
+  uuid id = uuids::uuid::from_string(str).value();
+  assert(uuids::to_string<wchar_t>(id) == str);
   ```
 
 * Creating a UUID from a sequence of 16 bytes
