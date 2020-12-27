@@ -17,6 +17,7 @@
 #include <atomic>
 #include <span>
 
+#if defined(UUID_TIME_GENERATOR) || defined(UUID_SYSTEM_GENERATOR)
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -46,6 +47,7 @@
 #include <CoreFoundation/CFUUID.h>
 #endif
 
+#endif
 #endif
 
 namespace uuids
@@ -843,6 +845,7 @@ namespace uuids
       detail::sha1 hasher;
    };
 
+#ifdef UUID_TIME_GENERATOR
    // !!! DO NOT USE THIS IN PRODUCTION
    // this implementation is unreliable for good uuids
    class uuid_time_generator
@@ -924,6 +927,7 @@ namespace uuids
          return {};
       }
    };
+#endif
 }
 
 namespace std
