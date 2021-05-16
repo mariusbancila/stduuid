@@ -82,9 +82,19 @@ namespace uuids
       }
 
       template <typename TChar>
-      constexpr inline unsigned char hexpair2char(TChar const a, TChar const b)
+      constexpr std::basic_string_view<TChar> to_string_view(TChar const * str)
       {
-         return (hex2char(a) << 4) | hex2char(b);
+         if (str) return str;
+         return {};
+      }
+
+      template <typename StringType>
+      constexpr std::basic_string_view<
+         typename StringType::value_type,
+         typename StringType::traits_type>
+      to_string_view(StringType const & str)
+      {
+         return str;
       }
 
       class sha1
@@ -348,17 +358,14 @@ namespace uuids
    public:
       using value_type = uint8_t;
 
-      constexpr uuid() noexcept : data({}) {};
+      constexpr uuid() noexcept = default;
 
       uuid(value_type(&arr)[16]) noexcept
       {
          std::copy(std::cbegin(arr), std::cend(arr), std::begin(data));
       }
 
-      uuid(std::array<value_type, 16> const & arr) noexcept
-      {
-         std::copy(std::cbegin(arr), std::cend(arr), std::begin(data));
-      }
+      constexpr uuid(std::array<value_type, 16> const & arr) noexcept : data{arr} {}
 
       explicit uuid(span<value_type, 16> bytes)
       {
@@ -416,29 +423,25 @@ namespace uuids
          return span<std::byte const, 16>(reinterpret_cast<std::byte const*>(data.data()), 16);
       }
 
-      template<class CharT = char>
-      static bool is_valid_uuid(CharT const * str) noexcept
+      template <typename StringType>
+      constexpr static bool is_valid_uuid(StringType const & in_str) noexcept
       {
+         auto str = detail::to_string_view(in_str);
          bool firstDigit = true;
          int hasBraces = 0;
          size_t index = 0;
-         size_t size = 0;
-         if constexpr(std::is_same_v<CharT, char>)
-            size = strlen(str);
-         else
-            size = wcslen(str);
 
-         if (str == nullptr || size == 0) 
+         if (str.empty())
             return false;
 
-         if (str[0] == static_cast<CharT>('{'))
+         if (str.front() == '{')
             hasBraces = 1;
-         if (hasBraces && str[size - 1] != static_cast<CharT>('}'))
+         if (hasBraces && str.back() != '}')
             return false;
 
-         for (size_t i = hasBraces; i < size - hasBraces; ++i)
+         for (size_t i = hasBraces; i < str.size() - hasBraces; ++i)
          {
-            if (str[i] == static_cast<CharT>('-')) continue;
+            if (str[i] == '-') continue;
 
             if (index >= 16 || !detail::is_hex(str[i]))
             {
@@ -464,39 +467,26 @@ namespace uuids
          return true;
       }
 
-      template<class CharT = char,
-         class Traits = std::char_traits<CharT>,
-         class Allocator = std::allocator<CharT>>
-      static bool is_valid_uuid(std::basic_string<CharT, Traits, Allocator> const & str) noexcept
+      template <typename StringType>
+      constexpr static std::optional<uuid> from_string(StringType const & in_str) noexcept
       {
-         return is_valid_uuid(str.c_str());
-      }
-
-      template<class CharT = char>
-      static std::optional<uuid> from_string(CharT const * str) noexcept
-      {
-         CharT digit = 0;
+         auto str = detail::to_string_view(in_str);
          bool firstDigit = true;
          int hasBraces = 0;
          size_t index = 0;
-         size_t size = 0;
-         if constexpr(std::is_same_v<CharT, char>)
-            size = strlen(str);
-         else
-            size = wcslen(str);
 
          std::array<uint8_t, 16> data{ { 0 } };
 
-         if (str == nullptr || size == 0) return {};
+         if (str.empty()) return {};
 
-         if (str[0] == static_cast<CharT>('{'))
+         if (str.front() == '{')
             hasBraces = 1;
-         if (hasBraces && str[size - 1] != static_cast<CharT>('}'))
+         if (hasBraces && str.back() != '}')
             return {};
 
-         for (size_t i = hasBraces; i < size - hasBraces; ++i)
+         for (size_t i = hasBraces; i < str.size() - hasBraces; ++i)
          {
-            if (str[i] == static_cast<CharT>('-')) continue;
+            if (str[i] == '-') continue;
 
             if (index >= 16 || !detail::is_hex(str[i]))
             {
@@ -505,12 +495,12 @@ namespace uuids
 
             if (firstDigit)
             {
-               digit = str[i];
+               data[index] = detail::hex2char(str[i]) << 4;
                firstDigit = false;
             }
             else
             {
-               data[index++] = detail::hexpair2char(digit, str[i]);
+               data[index++] |= detail::hex2char(str[i]);
                firstDigit = true;
             }
          }
@@ -520,7 +510,7 @@ namespace uuids
             return {};
          }
 
-         return uuid{ std::cbegin(data), std::cend(data) };
+         return uuid{ data };
       }
 
       template<class CharT = char, 
@@ -769,27 +759,11 @@ namespace uuids
          : nsuuid(namespace_uuid)
       {}
 
-      template<class CharT = char>
-      uuid operator()(CharT const * name)
-      {
-         size_t size = 0;
-         if constexpr (std::is_same_v<CharT, char>)
-            size = strlen(name);
-         else
-            size = wcslen(name);
-
-         reset();
-         process_characters(name, size);
-         return make_uuid();
-      }
-
-      template<class CharT = char,
-         class Traits = std::char_traits<CharT>,
-         class Allocator = std::allocator<CharT>>
-      uuid operator()(std::basic_string<CharT, Traits, Allocator> const & name)
+      template <typename StringType>
+      uuid operator()(StringType const & name)
       {
          reset();
-         process_characters(name.data(), name.size());
+         process_characters(detail::to_string_view(name));
          return make_uuid();
       }
 
@@ -802,24 +776,20 @@ namespace uuids
          std::copy(std::cbegin(nsbytes), std::cend(nsbytes), bytes);
          hasher.process_bytes(bytes, 16);
       }
-      
-      template <typename char_type,
-                typename = std::enable_if_t<std::is_integral<char_type>::value>>
-      void process_characters(char_type const * const characters, size_t const count)
-      {
-         for (size_t i = 0; i < count; i++) 
-         {
-            uint32_t c = characters[i];
-            hasher.process_byte(static_cast<unsigned char>((c >> 0) & 0xFF));
-            hasher.process_byte(static_cast<unsigned char>((c >> 8) & 0xFF));
-            hasher.process_byte(static_cast<unsigned char>((c >> 16) & 0xFF));
-            hasher.process_byte(static_cast<unsigned char>((c >> 24) & 0xFF));
-         }
-      }
 
-      void process_characters(const char * const characters, size_t const count)
+      template <typename CharT, typename Traits>
+      void process_characters(std::basic_string_view<CharT, Traits> const str)
       {
-         hasher.process_bytes(characters, count);
+         for (uint32_t c : str)
+         {
+            hasher.process_byte(static_cast<uint8_t>(c & 0xFF));
+            if constexpr (!std::is_same_v<CharT, char>)
+            {
+               hasher.process_byte(static_cast<uint8_t>((c >> 8) & 0xFF));
+               hasher.process_byte(static_cast<uint8_t>((c >> 16) & 0xFF));
+               hasher.process_byte(static_cast<uint8_t>((c >> 24) & 0xFF));
+            }
+         }
       }
 
       uuid make_uuid()

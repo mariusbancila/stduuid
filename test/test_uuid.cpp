@@ -100,6 +100,20 @@ TEST_CASE("Test is_valid_uuid(basic_string)", "[parse]")
    }
 }
 
+TEST_CASE("Test is_valid_uuid(basic_string_view)", "[parse]")
+{
+   using namespace std::string_view_literals;
+
+   REQUIRE(uuids::uuid::is_valid_uuid("47183823-2574-4bfd-b411-99ed177d3e43"sv));
+   REQUIRE(uuids::uuid::is_valid_uuid("{47183823-2574-4bfd-b411-99ed177d3e43}"sv));
+   REQUIRE(uuids::uuid::is_valid_uuid(L"47183823-2574-4bfd-b411-99ed177d3e43"sv));
+   REQUIRE(uuids::uuid::is_valid_uuid(L"{47183823-2574-4bfd-b411-99ed177d3e43}"sv));
+   REQUIRE(uuids::uuid::is_valid_uuid("00000000-0000-0000-0000-000000000000"sv));
+   REQUIRE(uuids::uuid::is_valid_uuid("{00000000-0000-0000-0000-000000000000}"sv));
+   REQUIRE(uuids::uuid::is_valid_uuid(L"00000000-0000-0000-0000-000000000000"sv));
+   REQUIRE(uuids::uuid::is_valid_uuid(L"{00000000-0000-0000-0000-000000000000}"sv));
+}
+
 TEST_CASE("Test is_valid_uuid(char*) invalid format", "[parse]")
 {
    REQUIRE(!uuids::uuid::is_valid_uuid(""));
@@ -143,6 +157,18 @@ TEST_CASE("Test is_valid_uuid(basic_string) invalid format", "[parse]")
       auto str = "47183823-2574-4bfd-b411-99ed177d3e43}"s;
       REQUIRE(!uuids::uuid::is_valid_uuid(str));
    }
+}
+
+TEST_CASE("Test is_valid_uuid(basic_string_view) invalid format", "[parse]")
+{
+   using namespace std::string_view_literals;
+
+   REQUIRE(!uuids::uuid::is_valid_uuid(""sv));
+   REQUIRE(!uuids::uuid::is_valid_uuid("{}"sv));
+   REQUIRE(!uuids::uuid::is_valid_uuid("47183823-2574-4bfd-b411-99ed177d3e4"sv));
+   REQUIRE(!uuids::uuid::is_valid_uuid("47183823-2574-4bfd-b411-99ed177d3e430"sv));
+   REQUIRE(!uuids::uuid::is_valid_uuid("{47183823-2574-4bfd-b411-99ed177d3e43"sv));
+   REQUIRE(!uuids::uuid::is_valid_uuid("47183823-2574-4bfd-b411-99ed177d3e43}"sv));
 }
 
 TEST_CASE("Test from_string(char*)", "[parse]")
@@ -219,7 +245,7 @@ TEST_CASE("Test from_string(basic_string)", "[parse]")
    }
 
    {
-      auto guid = uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43").value();
+      auto guid = uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43"s).value();
       REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
       REQUIRE(uuids::to_string<wchar_t>(guid) == L"47183823-2574-4bfd-b411-99ed177d3e43");
    }
@@ -256,6 +282,65 @@ TEST_CASE("Test from_string(basic_string)", "[parse]")
 
    {
       auto str = L"{00000000-0000-0000-0000-000000000000}"s;
+      auto guid = uuids::uuid::from_string(str).value();
+      REQUIRE(guid.is_nil());
+   }
+}
+
+TEST_CASE("Test from_string(basic_string_view)", "[parse]")
+{
+   using namespace std::string_view_literals;
+
+   {
+      auto str = "47183823-2574-4bfd-b411-99ed177d3e43"sv;
+      auto guid = uuids::uuid::from_string(str).value();
+      REQUIRE(uuids::to_string(guid) == str);
+   }
+
+   {
+      auto str = "{47183823-2574-4bfd-b411-99ed177d3e43}"sv;
+      auto guid = uuids::uuid::from_string(str).value();
+      REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
+   }
+
+   {
+      auto guid = uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43"sv).value();
+      REQUIRE(uuids::to_string(guid) == "47183823-2574-4bfd-b411-99ed177d3e43");
+      REQUIRE(uuids::to_string<wchar_t>(guid) == L"47183823-2574-4bfd-b411-99ed177d3e43");
+   }
+
+   {
+      auto str = L"47183823-2574-4bfd-b411-99ed177d3e43"sv;
+      auto guid = uuids::uuid::from_string(str).value();
+      REQUIRE(uuids::to_string<wchar_t>(guid) == str);
+   }
+
+   {
+      auto str = "4718382325744bfdb41199ed177d3e43"sv;
+      REQUIRE_NOTHROW(uuids::uuid::from_string(str));
+      REQUIRE(uuids::uuid::from_string(str).has_value());
+   }
+
+   {
+      auto str = "00000000-0000-0000-0000-000000000000"sv;
+      auto guid = uuids::uuid::from_string(str).value();
+      REQUIRE(guid.is_nil());
+   }
+
+   {
+      auto str = "{00000000-0000-0000-0000-000000000000}"sv;
+      auto guid = uuids::uuid::from_string(str).value();
+      REQUIRE(guid.is_nil());
+   }
+
+   {
+      auto str = L"00000000-0000-0000-0000-000000000000"sv;
+      auto guid = uuids::uuid::from_string(str).value();
+      REQUIRE(guid.is_nil());
+   }
+
+   {
+      auto str = L"{00000000-0000-0000-0000-000000000000}"sv;
       auto guid = uuids::uuid::from_string(str).value();
       REQUIRE(guid.is_nil());
    }
@@ -304,6 +389,18 @@ TEST_CASE("Test from_string(basic_string) invalid format", "[parse]")
       auto str = "47183823-2574-4bfd-b411-99ed177d3e43}"s;
       REQUIRE(!uuids::uuid::from_string(str).has_value());
    }
+}
+
+TEST_CASE("Test from_string(basic_string_view) invalid format", "[parse]")
+{
+   using namespace std::string_view_literals;
+
+   REQUIRE(!uuids::uuid::from_string(""sv).has_value());
+   REQUIRE(!uuids::uuid::from_string("{}"sv).has_value());
+   REQUIRE(!uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e4"sv).has_value());
+   REQUIRE(!uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e430"sv).has_value());
+   REQUIRE(!uuids::uuid::from_string("{47183823-2574-4bfd-b411-99ed177d3e43"sv).has_value());
+   REQUIRE(!uuids::uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43}"sv).has_value());
 }
 
 TEST_CASE("Test iterators constructor", "[ctors]")
