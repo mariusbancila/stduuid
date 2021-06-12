@@ -346,6 +346,14 @@ TEST_CASE("Test from_string(basic_string_view)", "[parse]")
    }
 }
 
+TEST_CASE("Test constexpr from_string", "[const]")
+{
+   constexpr uuid value = uuid::from_string("47183823-2574-4bfd-b411-99ed177d3e43").value();
+   static_assert(!value.is_nil());
+   static_assert(value.variant() == uuid_variant::rfc);
+   static_assert(value.version() != uuid_version::none);
+}
+
 TEST_CASE("Test from_string(char*) invalid format", "[parse]")
 {
    REQUIRE(!uuids::uuid::from_string("").has_value());
@@ -560,9 +568,9 @@ TEST_CASE("Test swap", "[ops]")
 TEST_CASE("Test constexpr", "[const]")
 {
    constexpr uuid empty;
-   [[maybe_unused]] constexpr bool isnil = empty.is_nil();
-   [[maybe_unused]] constexpr uuids::uuid_variant variant = empty.variant();
-   [[maybe_unused]] constexpr uuid_version version = empty.version();
+   static_assert(empty.is_nil());
+   static_assert(empty.variant() == uuid_variant::ncs);
+   static_assert(empty.version() == uuid_version::none);
 }
 
 TEST_CASE("Test size", "[operators]")
