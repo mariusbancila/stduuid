@@ -513,14 +513,6 @@ namespace uuids
          return uuid{ data };
       }
 
-      template<class CharT = char, 
-               class Traits = std::char_traits<CharT>,
-               class Allocator = std::allocator<CharT>>
-      static std::optional<uuid> from_string(std::basic_string<CharT, Traits, Allocator> const & str) noexcept
-      {
-         return from_string(str.c_str());
-      }
-
    private:
       std::array<value_type, 16> data{ { 0 } };
 
