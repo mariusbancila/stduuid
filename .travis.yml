@@ -1,21 +1,24 @@
 language: cpp
 compiler: gcc
-dist: trusty
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - cppcheck
+      - g++-8
+      - uuid-dev
 
 before_install:
-  - sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update -qq
   - sudo apt-cache search libuuid
 
 install: 
-  - sudo apt-get install -qq g++-8
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 90
-  - sudo apt-get install -qq cppcheck
-  - sudo apt-get install uuid-dev
   
 before_script:
   - cd ${TRAVIS_BUILD_DIR}
-  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTS=ON -Wdev
+  - cmake -H. -BBuild -DCMAKE_BUILD_TYPE=Release -Wdev
   - cd Build
   
 script:
