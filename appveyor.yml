@@ -3,23 +3,20 @@ version: '{build}'
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      platform: x86
-      FLAGS: ""
-      GENERATOR: Visual Studio 15 2017
+      CMAKE_GENERATOR: Visual Studio 15 2017
+      CMAKE_GENERATOR_PLATFORM: Win32
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-      platform: x64
-      FLAGS: ""
-      GENERATOR: Visual Studio 15 2017
+      CMAKE_GENERATOR: Visual Studio 15 2017
+      CMAKE_GENERATOR_PLATFORM: x64
 
 init:
   - cmake --version
   - msbuild /version
 
 before_build:
-  - mkdir build
+  - cmake -S . -B build
   - cd build
-  - cmake .. -G "%GENERATOR%" -DBUILD_TESTS=ON -DCMAKE_CXX_FLAGS="%FLAGS%" -DCMAKE_IGNORE_PATH="C:/Program Files/Git/usr/bin"
 
 build_script:
   - cmake --build . --config Release
