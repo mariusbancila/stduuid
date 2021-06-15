@@ -297,7 +297,7 @@ TEST_CASE("Test name generator equality (char const*, std::string, std::string_v
    REQUIRE(id2 == id3);
 }
 
-#ifdef _WIN32
+#ifdef UUID_TIME_GENERATOR
 TEST_CASE("Test time generator", "[gen][time]")
 {
    uuid_time_generator gen;
