@@ -17,23 +17,16 @@
 #include <atomic>
 #include <span>
 
-#if defined(UUID_TIME_GENERATOR) || defined(UUID_SYSTEM_GENERATOR)
 #ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
 
 #ifdef UUID_SYSTEM_GENERATOR
 #include <objbase.h>
 #endif
 
-#include <windows.h>
-#include <intrin.h>       
+#ifdef UUID_TIME_GENERATOR
 #include <iphlpapi.h> 
 #pragma comment(lib, "IPHLPAPI.lib")
+#endif
 
 #elif defined(__linux__) || defined(__unix__)
 
@@ -47,7 +40,6 @@
 #include <CoreFoundation/CFUUID.h>
 #endif
 
-#endif
 #endif
 
 namespace uuids
@@ -278,10 +270,6 @@ namespace uuids
          size_t m_blockByteIndex;
          size_t m_byteCount;
       };
-
-      static std::mt19937 clock_gen(std::random_device{}());
-      static std::uniform_int_distribution<short> clock_dis{ -32768, 32767 };
-      static std::atomic_short clock_sequence = clock_dis(clock_gen);
    }
 
    // --------------------------------------------------------------------------------------------------------------------------
@@ -847,11 +835,15 @@ namespace uuids
          return ns / 100;
       }
 
-   public:
-      uuid_time_generator()
+      static short get_clock_sequence()
       {
+         static std::mt19937 clock_gen(std::random_device{}());
+         static std::uniform_int_distribution<short> clock_dis{ -32768, 32767 };
+         static std::atomic_short clock_sequence = clock_dis(clock_gen);
+         return clock_sequence++;
       }
 
+   public:
       uuid operator()()
       {
          if (get_mac_address())
@@ -860,12 +852,9 @@ namespace uuids
 
             auto tm = get_time_intervals();
 
-            short clock_seq = detail::clock_sequence++;
-
-            clock_seq &= 0x3FFF;
+            short clock_seq = get_clock_sequence();
 
             auto ptm = reinterpret_cast<uuids::uuid::value_type*>(&tm);
-            ptm[0] &= 0x0F;
 
             memcpy(&data[0], ptm + 4, 4);
             memcpy(&data[4], ptm + 2, 2);
@@ -878,7 +867,7 @@ namespace uuids
             data[8] |= 0x80;
 
             // version must be 0b0001xxxx
-            data[6] &= 0x5F;
+            data[6] &= 0x1F;
             data[6] |= 0x10;
 
             memcpy(&data[10], &device_address.value()[0], 6);
