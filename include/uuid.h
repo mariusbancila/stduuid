@@ -835,11 +835,11 @@ namespace uuids
          return ns / 100;
       }
 
-      static short get_clock_sequence()
+      static unsigned short get_clock_sequence()
       {
          static std::mt19937 clock_gen(std::random_device{}());
-         static std::uniform_int_distribution<short> clock_dis{ -32768, 32767 };
-         static std::atomic_short clock_sequence = clock_dis(clock_gen);
+         static std::uniform_int_distribution<unsigned short> clock_dis;
+         static std::atomic_ushort clock_sequence = clock_dis(clock_gen);
          return clock_sequence++;
       }
 
@@ -852,7 +852,7 @@ namespace uuids
 
             auto tm = get_time_intervals();
 
-            short clock_seq = get_clock_sequence();
+            auto clock_seq = get_clock_sequence();
 
             auto ptm = reinterpret_cast<uuids::uuid::value_type*>(&tm);
 
@@ -860,7 +860,7 @@ namespace uuids
             memcpy(&data[4], ptm + 2, 2);
             memcpy(&data[6], ptm, 2);
 
-            memcpy(&data[8], reinterpret_cast<uuids::uuid::value_type*>(&clock_seq), 2);
+            memcpy(&data[8], &clock_seq, 2);
 
             // variant must be 0b10xxxxxx
             data[8] &= 0xBF;
