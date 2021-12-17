@@ -180,30 +180,30 @@ namespace uuids
             digest32_t d32;
             get_digest(d32);
             size_t di = 0;
-            digest[di++] = (uint8_t)(d32[0] >> 24);
-            digest[di++] = (uint8_t)(d32[0] >> 16);
-            digest[di++] = (uint8_t)(d32[0] >>  8);
-            digest[di++] = (uint8_t)(d32[0] >>  0);
+            digest[di++] = static_cast<uint8_t>(d32[0] >> 24);
+            digest[di++] = static_cast<uint8_t>(d32[0] >> 16);
+            digest[di++] = static_cast<uint8_t>(d32[0] >> 8);
+            digest[di++] = static_cast<uint8_t>(d32[0] >> 0);
 
-            digest[di++] = (uint8_t)(d32[1] >> 24);
-            digest[di++] = (uint8_t)(d32[1] >> 16);
-            digest[di++] = (uint8_t)(d32[1] >>  8);
-            digest[di++] = (uint8_t)(d32[1] >>  0);
+            digest[di++] = static_cast<uint8_t>(d32[1] >> 24);
+            digest[di++] = static_cast<uint8_t>(d32[1] >> 16);
+            digest[di++] = static_cast<uint8_t>(d32[1] >> 8);
+            digest[di++] = static_cast<uint8_t>(d32[1] >> 0);
 
-            digest[di++] = (uint8_t)(d32[2] >> 24);
-            digest[di++] = (uint8_t)(d32[2] >> 16);
-            digest[di++] = (uint8_t)(d32[2] >>  8);
-            digest[di++] = (uint8_t)(d32[2] >>  0);
+            digest[di++] = static_cast<uint8_t>(d32[2] >> 24);
+            digest[di++] = static_cast<uint8_t>(d32[2] >> 16);
+            digest[di++] = static_cast<uint8_t>(d32[2] >> 8);
+            digest[di++] = static_cast<uint8_t>(d32[2] >> 0);
 
-            digest[di++] = (uint8_t)(d32[3] >> 24);
-            digest[di++] = (uint8_t)(d32[3] >> 16);
-            digest[di++] = (uint8_t)(d32[3] >>  8);
-            digest[di++] = (uint8_t)(d32[3] >>  0);
+            digest[di++] = static_cast<uint8_t>(d32[3] >> 24);
+            digest[di++] = static_cast<uint8_t>(d32[3] >> 16);
+            digest[di++] = static_cast<uint8_t>(d32[3] >> 8);
+            digest[di++] = static_cast<uint8_t>(d32[3] >> 0);
 
-            digest[di++] = (uint8_t)(d32[4] >> 24);
-            digest[di++] = (uint8_t)(d32[4] >> 16);
-            digest[di++] = (uint8_t)(d32[4] >>  8);
-            digest[di++] = (uint8_t)(d32[4] >>  0);
+            digest[di++] = static_cast<uint8_t>(d32[4] >> 24);
+            digest[di++] = static_cast<uint8_t>(d32[4] >> 16);
+            digest[di++] = static_cast<uint8_t>(d32[4] >> 8);
+            digest[di++] = static_cast<uint8_t>(d32[4] >> 0);
 
             return digest;
          }
@@ -213,10 +213,10 @@ namespace uuids
          {
             uint32_t w[80];
             for (size_t i = 0; i < 16; i++) {
-               w[i] = (m_block[i * 4 + 0] << 24);
-               w[i] |= (m_block[i * 4 + 1] << 16);
-               w[i] |= (m_block[i * 4 + 2] << 8);
-               w[i] |= (m_block[i * 4 + 3]);
+               w[i] = static_cast<uint32_t>(m_block[i * 4 + 0] << 24);
+               w[i] |= static_cast<uint32_t>(m_block[i * 4 + 1] << 16);
+               w[i] |= static_cast<uint32_t>(m_block[i * 4 + 2] << 8);
+               w[i] |= static_cast<uint32_t>(m_block[i * 4 + 3]);
             }
             for (size_t i = 16; i < 80; i++) {
                w[i] = left_rotate((w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16]), 1);
@@ -540,26 +540,26 @@ namespace uuids
       
       // manipulate stream as needed
       s << std::hex << std::setfill(static_cast<Elem>('0'))
-         << std::setw(2) << (int)id.data[0]
-         << std::setw(2) << (int)id.data[1]
-         << std::setw(2) << (int)id.data[2]
-         << std::setw(2) << (int)id.data[3]
+        << std::setw(2) << static_cast<int>(id.data[0])
+        << std::setw(2) << static_cast<int>(id.data[1])
+        << std::setw(2) << static_cast<int>(id.data[2])
+        << std::setw(2) << static_cast<int>(id.data[3])
          << '-'
-         << std::setw(2) << (int)id.data[4]
-         << std::setw(2) << (int)id.data[5]
+        << std::setw(2) << static_cast<int>(id.data[4])
+        << std::setw(2) << static_cast<int>(id.data[5])
          << '-'
-         << std::setw(2) << (int)id.data[6]
-         << std::setw(2) << (int)id.data[7]
+        << std::setw(2) << static_cast<int>(id.data[6])
+        << std::setw(2) << static_cast<int>(id.data[7])
          << '-'
-         << std::setw(2) << (int)id.data[8]
-         << std::setw(2) << (int)id.data[9]
+        << std::setw(2) << static_cast<int>(id.data[8])
+        << std::setw(2) << static_cast<int>(id.data[9])
          << '-'
-         << std::setw(2) << (int)id.data[10]
-         << std::setw(2) << (int)id.data[11]
-         << std::setw(2) << (int)id.data[12]
-         << std::setw(2) << (int)id.data[13]
-         << std::setw(2) << (int)id.data[14]
-         << std::setw(2) << (int)id.data[15];
+        << std::setw(2) << static_cast<int>(id.data[10])
+        << std::setw(2) << static_cast<int>(id.data[11])
+        << std::setw(2) << static_cast<int>(id.data[12])
+        << std::setw(2) << static_cast<int>(id.data[13])
+        << std::setw(2) << static_cast<int>(id.data[14])
+        << std::setw(2) << static_cast<int>(id.data[15]);
 
       // restore original flags
       s.flags(f);
@@ -617,10 +617,10 @@ namespace uuids
 
          std::array<uint8_t, 16> bytes =
          { {
-               (unsigned char)((newId.Data1 >> 24) & 0xFF),
-               (unsigned char)((newId.Data1 >> 16) & 0xFF),
-               (unsigned char)((newId.Data1 >> 8) & 0xFF),
-               (unsigned char)((newId.Data1) & 0xFF),
+               static_cast<unsigned char>((newId.Data1 >> 24) & 0xFF),
+               static_cast<unsigned char>((newId.Data1 >> 16) & 0xFF),
+               static_cast<unsigned char>((newId.Data1 >> 8) & 0xFF),
+               static_cast<unsigned char>((newId.Data1) & 0xFF),
 
                (unsigned char)((newId.Data2 >> 8) & 0xFF),
                (unsigned char)((newId.Data2) & 0xFF),
