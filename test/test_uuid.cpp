@@ -525,7 +525,11 @@ TEST_CASE("Test hashing", "[ops]")
 
    auto h1 = std::hash<std::string>{};
    auto h2 = std::hash<uuid>{};
+#ifdef UUID_HASH_STRING_BASED
    REQUIRE(h1(str) == h2(guid));
+#else
+   REQUIRE(h1(str) != h2(guid));
+#endif
 
    auto engine = uuids::uuid_random_generator::engine_type{};
    seed_rng(engine);

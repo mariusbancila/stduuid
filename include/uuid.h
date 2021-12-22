@@ -526,6 +526,8 @@ namespace uuids
 
       template<class CharT, class Traits, class Allocator>
       friend std::basic_string<CharT, Traits, Allocator> to_string(uuid const& id);
+
+      friend std::hash<uuid>;
    };
 
    // --------------------------------------------------------------------------------------------------------------------------
@@ -922,8 +924,39 @@ namespace std
 
       result_type operator()(argument_type const &uuid) const
       {
+#ifdef UUID_HASH_STRING_BASED
          std::hash<std::string> hasher;
          return static_cast<result_type>(hasher(uuids::to_string(uuid)));
+#else
+         uint64_t l = 
+            static_cast<uint64_t>(uuid.data[0]) << 56 | 
+            static_cast<uint64_t>(uuid.data[1]) << 48 | 
+            static_cast<uint64_t>(uuid.data[2]) << 40 | 
+            static_cast<uint64_t>(uuid.data[3]) << 32 | 
+            static_cast<uint64_t>(uuid.data[4]) << 24 | 
+            static_cast<uint64_t>(uuid.data[5]) << 16 | 
+            static_cast<uint64_t>(uuid.data[6]) <<  8 | 
+            static_cast<uint64_t>(uuid.data[7]);
+         uint64_t h = 
+            static_cast<uint64_t>(uuid.data[8])  << 56 | 
+            static_cast<uint64_t>(uuid.data[9])  << 48 | 
+            static_cast<uint64_t>(uuid.data[10]) << 40 | 
+            static_cast<uint64_t>(uuid.data[11]) << 32 | 
+            static_cast<uint64_t>(uuid.data[12]) << 24 | 
+            static_cast<uint64_t>(uuid.data[13]) << 16 | 
+            static_cast<uint64_t>(uuid.data[14]) <<  8 | 
+            static_cast<uint64_t>(uuid.data[15]);
+
+         if (sizeof(result_type) > 4)
+         {
+            return result_type(l ^ h);
+         }
+         else
+         {
+            uint64_t hash64 = l ^ h;
+            return result_type(uint32_t(hash64 >> 32) ^ uint32_t(hash64));
+         }
+#endif
       }
    };
 }
