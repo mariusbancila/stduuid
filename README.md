@@ -256,10 +256,16 @@ The following is a list of examples for using the library:
   auto h2 = std::hash<uuid>{};
   assert(h1(str) == h2(id));
   ```
+  
+### Random uuids
 
 If you generate uuids using the `basic_uuid_random_generator` and [std::random_device](https://en.cppreference.com/w/cpp/numeric/random/random_device) to seed a generator, keep in mind that this might not be non-deterministic and actually generate the same sequence of numbers:
 
 > std::random_device may be implemented in terms of an implementation-defined pseudo-random number engine if a non-deterministic source (e.g. a hardware device) is not available to the implementation. In this case each std::random_device object may generate the same number sequence.
+
+This could be a problem with MinGW. See [Bug 85494 - implementation of random_device on mingw is useless](https://gcc.gnu.org/bugzilla/show_bug.cgi?id=85494). This was fixed in GCC 9.2.
+
+A portable alternative is to use the [Boost.Random](https://www.boost.org/doc/libs/1_78_0/doc/html/boost_random.html) library.
 
 ## Support
 The library is supported on all major operating systems: Windows, Linux and Mac OS.
