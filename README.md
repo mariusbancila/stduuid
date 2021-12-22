@@ -27,6 +27,7 @@ Generators:
 | `uuid_random_generator` | a `basic_uuid_random_generator` using the Mersenne Twister engine (`basic_uuid_random_generator<std::mt19937>`) |
 | `uuid_name_generator` | a function object that generates version 5, name-based UUIDs using SHA1 hashing. |
 | `uuid_system_generator` | a function object that generates new UUIDs using operating system resources (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac) <br><br> **Note**: This is not part of the standard proposal. It is available only if the `UUID_SYSTEM_GENERATOR` macro is defined. |
+| `uuid_time_generator` | an experimental function object that generates time-based UUIDs.<br><br> **Note**:This is an experimental feature and should not be used in any production code. It is available only if the `UUID_TIME_GENERATOR` macro is defined. |
 
 Utilities:
 
@@ -260,7 +261,13 @@ The following is a list of examples for using the library:
 The library is supported on all major operating systems: Windows, Linux and Mac OS.
 
 ## Dependencies
-Because no major compiler supports `std::span` yet the [Microsoft Guidelines Support Library](https://github.com/Microsoft/GSL) (aka GSL) is used for its span implementation (from which the standard version was defined). 
+If you use the library in a project built with C++20, then you can use `std::span`. This is used by default, if the header is supported by your compiler. The check is done with the [__cpp_lib_span](https://en.cppreference.com/w/cpp/utility/feature_test) feature-test macro.
+
+Otherwise, such as when building with C++17, `std::span` is not available. However, the [Microsoft Guidelines Support Library](https://github.com/Microsoft/GSL) (aka GSL) can be used for its `span` implementation (from which the standard version was defined). The stduuid library defaults to use this implementation if `std::span` is not available.
+
+To ensure `gsl::span` can be used, make sure the GSL library is available, and the GSL include directory is listed in the include directories for the project.
+
+If you use cmake to build the test project, make sure the variable called `UUID_USING_CXX20_SPAN` is not defined, or it's value is `OFF` (this is the default value). This will ensure the `gsl` directory will be included in the search list of header directories.
 
 ## Testing
 A testing project is available in the sources. To build and execute the tests do the following:
@@ -269,6 +276,26 @@ A testing project is available in the sources. To build and execute the tests do
 * Run the command `cmake ..` from the `build` directory; if you do not have CMake you must install it first.
 * Build the project created in the previous step
 * Run the executable.
+
+**Examples**
+
+To generate a project files for Visual Studio 2019, you can run the following commands:
+```
+cd build
+cmake -G "Visual Studio 17" -A x64 ..
+```
+
+To enable the operating system uuid generator set the `UUID_SYSTEM_GENERATOR` variable to `ON`.
+```
+cd build
+cmake -G "Visual Studio 17" -A x64 -DUUID_SYSTEM_GENERATOR=ON ..
+```
+
+To enable the experimental time-based uuid generator set the `UUID_TIME_GENERATOR` variable to `ON`.
+```
+cd build
+cmake -G "Visual Studio 17" -A x64 -DUUID_TIME_GENERATOR=ON ..
+```
 
 ## Credits
 The SHA1 implementation is based on the [TinySHA1](https://github.com/mohaps/TinySHA1) library.
