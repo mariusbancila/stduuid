@@ -272,16 +272,16 @@ namespace uuids
       };
 
       template <typename CharT>
-      constexpr CharT empty_guid[] = "00000000-0000-0000-0000-000000000000";
+      constexpr CharT empty_guid[37] = "00000000-0000-0000-0000-000000000000";
 
       template <>
-      constexpr wchar_t empty_guid<wchar_t>[] = L"00000000-0000-0000-0000-000000000000";
+      constexpr wchar_t empty_guid<wchar_t>[37] = L"00000000-0000-0000-0000-000000000000";
 
       template <typename CharT>
-      constexpr CharT guid_encoder[] = "0123456789abcdef";
+      constexpr CharT guid_encoder[17] = "0123456789abcdef";
 
       template <>
-      constexpr wchar_t guid_encoder<wchar_t>[] = L"0123456789abcdef";
+      constexpr wchar_t guid_encoder<wchar_t>[17] = L"0123456789abcdef";
    }
 
    // --------------------------------------------------------------------------------------------------------------------------
