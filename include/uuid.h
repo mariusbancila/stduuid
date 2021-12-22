@@ -613,7 +613,12 @@ namespace uuids
 #ifdef _WIN32
 
          GUID newId;
-         ::CoCreateGuid(&newId);
+         HRESULT hr = ::CoCreateGuid(&newId);
+
+         if (FAILED(hr))
+         {
+            throw std::system_error(hr, std::system_category(), "CoCreateGuid failed");
+         }
 
          std::array<uint8_t, 16> bytes =
          { {
