@@ -270,6 +270,18 @@ namespace uuids
          size_t m_blockByteIndex;
          size_t m_byteCount;
       };
+
+      template <typename CharT>
+      constexpr CharT empty_guid[] = "00000000-0000-0000-0000-000000000000";
+
+      template <>
+      constexpr wchar_t empty_guid<wchar_t>[] = L"00000000-0000-0000-0000-000000000000";
+
+      template <typename CharT>
+      constexpr CharT guid_encoder[] = "0123456789abcdef";
+
+      template <>
+      constexpr wchar_t guid_encoder<wchar_t>[] = L"0123456789abcdef";
    }
 
    // --------------------------------------------------------------------------------------------------------------------------
@@ -511,6 +523,9 @@ namespace uuids
 
       template <class Elem, class Traits>
       friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);  
+
+      template<class CharT, class Traits, class Allocator>
+      friend std::basic_string<CharT, Traits, Allocator> to_string(uuid const& id);
    };
 
    // --------------------------------------------------------------------------------------------------------------------------
@@ -572,9 +587,20 @@ namespace uuids
             class Allocator = std::allocator<CharT>>
    inline std::basic_string<CharT, Traits, Allocator> to_string(uuid const & id)
    {
-      std::basic_stringstream<CharT, Traits, Allocator> sstr;
-      sstr << id;
-      return sstr.str();
+      std::basic_string<CharT, Traits, Allocator> uustr{detail::empty_guid<CharT>};
+
+      for (size_t i = 0, index = 0; i < 36; ++i)
+      {
+         if (i == 8 || i == 13 || i == 18 || i == 23)
+         {
+            continue;
+         }
+         uustr[i] = detail::guid_encoder<CharT>[id.data[index] >> 4 & 0x0f];
+         uustr[++i] = detail::guid_encoder<CharT>[id.data[index] & 0x0f];
+         index++;
+      }
+
+      return uustr;
    }
 
    inline void swap(uuids::uuid & lhs, uuids::uuid & rhs) noexcept
