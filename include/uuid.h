@@ -552,35 +552,7 @@ namespace uuids
    template <class Elem, class Traits>
    std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id)
    {
-      // save current flags
-      std::ios_base::fmtflags f(s.flags());
-      
-      // manipulate stream as needed
-      s << std::hex << std::setfill(static_cast<Elem>('0'))
-        << std::setw(2) << static_cast<int>(id.data[0])
-        << std::setw(2) << static_cast<int>(id.data[1])
-        << std::setw(2) << static_cast<int>(id.data[2])
-        << std::setw(2) << static_cast<int>(id.data[3])
-         << '-'
-        << std::setw(2) << static_cast<int>(id.data[4])
-        << std::setw(2) << static_cast<int>(id.data[5])
-         << '-'
-        << std::setw(2) << static_cast<int>(id.data[6])
-        << std::setw(2) << static_cast<int>(id.data[7])
-         << '-'
-        << std::setw(2) << static_cast<int>(id.data[8])
-        << std::setw(2) << static_cast<int>(id.data[9])
-         << '-'
-        << std::setw(2) << static_cast<int>(id.data[10])
-        << std::setw(2) << static_cast<int>(id.data[11])
-        << std::setw(2) << static_cast<int>(id.data[12])
-        << std::setw(2) << static_cast<int>(id.data[13])
-        << std::setw(2) << static_cast<int>(id.data[14])
-        << std::setw(2) << static_cast<int>(id.data[15]);
-
-      // restore original flags
-      s.flags(f);
-      
+      s << to_string(id);
       return s;
    }
 
