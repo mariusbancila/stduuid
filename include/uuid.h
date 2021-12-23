@@ -58,11 +58,11 @@ namespace uuids
       constexpr inline unsigned char hex2char(TChar const ch)
       {
          if (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9'))
-            return ch - static_cast<TChar>('0');
+            return static_cast<unsigned char>(ch - static_cast<TChar>('0'));
          if (ch >= static_cast<TChar>('a') && ch <= static_cast<TChar>('f'))
-            return 10 + ch - static_cast<TChar>('a');
+            return static_cast<unsigned char>(10 + ch - static_cast<TChar>('a'));
          if (ch >= static_cast<TChar>('A') && ch <= static_cast<TChar>('F'))
-            return 10 + ch - static_cast<TChar>('A');
+            return static_cast<unsigned char>(10 + ch - static_cast<TChar>('A'));
          return 0;
       }
 
@@ -418,7 +418,7 @@ namespace uuids
       {
          auto str = detail::to_string_view(in_str);
          bool firstDigit = true;
-         int hasBraces = 0;
+         size_t hasBraces = 0;
          size_t index = 0;
 
          if (str.empty())
@@ -462,7 +462,7 @@ namespace uuids
       {
          auto str = detail::to_string_view(in_str);
          bool firstDigit = true;
-         int hasBraces = 0;
+         size_t hasBraces = 0;
          size_t index = 0;
 
          std::array<uint8_t, 16> data{ { 0 } };
@@ -485,12 +485,13 @@ namespace uuids
 
             if (firstDigit)
             {
-               data[index] = detail::hex2char(str[i]) << 4;
+               data[index] = static_cast<uint8_t>(detail::hex2char(str[i]) << 4);
                firstDigit = false;
             }
             else
             {
-               data[index++] |= detail::hex2char(str[i]);
+               data[index] = static_cast<uint8_t>(data[index] | detail::hex2char(str[i]));
+			   index++;
                firstDigit = true;
             }
          }
