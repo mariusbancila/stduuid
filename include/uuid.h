@@ -550,13 +550,6 @@ namespace uuids
       return lhs.data < rhs.data;
    }
 
-   template <class Elem, class Traits>
-   std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id)
-   {
-      s << to_string(id);
-      return s;
-   }
-
    template<class CharT = char,
             class Traits = std::char_traits<CharT>,
             class Allocator = std::allocator<CharT>>
@@ -576,6 +569,13 @@ namespace uuids
       }
 
       return uustr;
+   }
+
+   template <class Elem, class Traits>
+   std::basic_ostream<Elem, Traits>& operator<<(std::basic_ostream<Elem, Traits>& s, uuid const& id)
+   {
+       s << to_string(id);
+       return s;
    }
 
    inline void swap(uuids::uuid & lhs, uuids::uuid & rhs) noexcept
