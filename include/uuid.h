@@ -516,7 +516,7 @@ namespace uuids
             else
             {
                data[index] = static_cast<uint8_t>(data[index] | detail::hex2char(str[i]));
-			   index++;
+               index++;
                firstDigit = true;
             }
          }
@@ -536,7 +536,7 @@ namespace uuids
       friend bool operator<(uuid const & lhs, uuid const & rhs) noexcept;
 
       template <class Elem, class Traits>
-      friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);  
+      friend std::basic_ostream<Elem, Traits> & operator<<(std::basic_ostream<Elem, Traits> &s, uuid const & id);
 
       template<class CharT, class Traits, class Allocator>
       friend std::basic_string<CharT, Traits, Allocator> to_string(uuid const& id);
@@ -719,7 +719,7 @@ namespace uuids
 #endif
 
    template <typename UniformRandomNumberGenerator>
-   class basic_uuid_random_generator 
+   class basic_uuid_random_generator
    {
    public:
       using engine_type = UniformRandomNumberGenerator;
@@ -914,23 +914,23 @@ namespace std
          std::hash<std::string> hasher;
          return static_cast<result_type>(hasher(uuids::to_string(uuid)));
 #else
-         uint64_t l = 
-            static_cast<uint64_t>(uuid.data[0]) << 56 | 
-            static_cast<uint64_t>(uuid.data[1]) << 48 | 
-            static_cast<uint64_t>(uuid.data[2]) << 40 | 
-            static_cast<uint64_t>(uuid.data[3]) << 32 | 
-            static_cast<uint64_t>(uuid.data[4]) << 24 | 
-            static_cast<uint64_t>(uuid.data[5]) << 16 | 
-            static_cast<uint64_t>(uuid.data[6]) <<  8 | 
+         uint64_t l =
+            static_cast<uint64_t>(uuid.data[0]) << 56 |
+            static_cast<uint64_t>(uuid.data[1]) << 48 |
+            static_cast<uint64_t>(uuid.data[2]) << 40 |
+            static_cast<uint64_t>(uuid.data[3]) << 32 |
+            static_cast<uint64_t>(uuid.data[4]) << 24 |
+            static_cast<uint64_t>(uuid.data[5]) << 16 |
+            static_cast<uint64_t>(uuid.data[6]) <<  8 |
             static_cast<uint64_t>(uuid.data[7]);
-         uint64_t h = 
-            static_cast<uint64_t>(uuid.data[8])  << 56 | 
-            static_cast<uint64_t>(uuid.data[9])  << 48 | 
-            static_cast<uint64_t>(uuid.data[10]) << 40 | 
-            static_cast<uint64_t>(uuid.data[11]) << 32 | 
-            static_cast<uint64_t>(uuid.data[12]) << 24 | 
-            static_cast<uint64_t>(uuid.data[13]) << 16 | 
-            static_cast<uint64_t>(uuid.data[14]) <<  8 | 
+         uint64_t h =
+            static_cast<uint64_t>(uuid.data[8])  << 56 |
+            static_cast<uint64_t>(uuid.data[9])  << 48 |
+            static_cast<uint64_t>(uuid.data[10]) << 40 |
+            static_cast<uint64_t>(uuid.data[11]) << 32 |
+            static_cast<uint64_t>(uuid.data[12]) << 24 |
+            static_cast<uint64_t>(uuid.data[13]) << 16 |
+            static_cast<uint64_t>(uuid.data[14]) <<  8 |
             static_cast<uint64_t>(uuid.data[15]);
 
          if constexpr (sizeof(result_type) > 4)
