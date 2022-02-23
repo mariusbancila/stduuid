@@ -1,4 +1,5 @@
-#pragma once
+#ifndef STDUUID_H
+#define STDUUID_H
 
 #include <cstring>
 #include <string>
@@ -62,7 +63,7 @@ namespace uuids
    namespace detail
    {
       template <typename TChar>
-      constexpr inline unsigned char hex2char(TChar const ch)
+      constexpr inline unsigned char hex2char(TChar const ch) noexcept
       {
          if (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9'))
             return static_cast<unsigned char>(ch - static_cast<TChar>('0'));
@@ -74,7 +75,7 @@ namespace uuids
       }
 
       template <typename TChar>
-      constexpr inline bool is_hex(TChar const ch)
+      constexpr inline bool is_hex(TChar const ch) noexcept
       {
          return
             (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9')) ||
@@ -83,17 +84,15 @@ namespace uuids
       }
 
       template <typename TChar>
-      constexpr std::basic_string_view<TChar> to_string_view(TChar const * str)
+      constexpr std::basic_string_view<TChar> to_string_view(TChar const * str) noexcept
       {
          if (str) return str;
          return {};
       }
 
       template <typename StringType>
-      constexpr std::basic_string_view<
-         typename StringType::value_type,
-         typename StringType::traits_type>
-      to_string_view(StringType const & str)
+      constexpr std::basic_string_view<typename StringType::value_type, typename StringType::traits_type>
+      to_string_view(StringType const & str) noexcept
       {
          return str;
       }
@@ -947,3 +946,5 @@ namespace std
       }
    };
 }
+
+#endif /* STDUUID_H */
