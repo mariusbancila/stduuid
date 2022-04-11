@@ -733,7 +733,7 @@ namespace uuids
 
       [[nodiscard]] uuid operator()()
       {
-         uint8_t bytes[16];
+         alignas(uint32_t) uint8_t bytes[16];
          for (int i = 0; i < 16; i += 4)
             *reinterpret_cast<uint32_t*>(bytes + i) = distribution(*generator);
 
