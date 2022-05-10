@@ -63,7 +63,7 @@ namespace uuids
    namespace detail
    {
       template <typename TChar>
-      constexpr inline unsigned char hex2char(TChar const ch) noexcept
+      [[nodiscard]] constexpr inline unsigned char hex2char(TChar const ch) noexcept
       {
          if (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9'))
             return static_cast<unsigned char>(ch - static_cast<TChar>('0'));
@@ -75,7 +75,7 @@ namespace uuids
       }
 
       template <typename TChar>
-      constexpr inline bool is_hex(TChar const ch) noexcept
+      [[nodiscard]] constexpr inline bool is_hex(TChar const ch) noexcept
       {
          return
             (ch >= static_cast<TChar>('0') && ch <= static_cast<TChar>('9')) ||
@@ -84,14 +84,17 @@ namespace uuids
       }
 
       template <typename TChar>
-      constexpr std::basic_string_view<TChar> to_string_view(TChar const * str) noexcept
+      [[nodiscard]] constexpr std::basic_string_view<TChar> to_string_view(TChar const * str) noexcept
       {
          if (str) return str;
          return {};
       }
 
       template <typename StringType>
-      constexpr std::basic_string_view<typename StringType::value_type, typename StringType::traits_type>
+	  [[nodiscard]] 
+      constexpr std::basic_string_view<
+         typename StringType::value_type,
+         typename StringType::traits_type>
       to_string_view(StringType const & str) noexcept
       {
          return str;
@@ -105,14 +108,14 @@ namespace uuids
 
          static constexpr unsigned int block_bytes = 64;
 
-         inline static uint32_t left_rotate(uint32_t value, size_t const count) 
+         [[nodiscard]] inline static uint32_t left_rotate(uint32_t value, size_t const count) noexcept
          {
             return (value << count) ^ (value >> (32 - count));
          }
 
          sha1() { reset(); }
 
-         void reset() 
+         void reset() noexcept
          {
             m_digest[0] = 0x67452301;
             m_digest[1] = 0xEFCDAB89;
@@ -394,7 +397,7 @@ namespace uuids
             std::copy(first, last, std::begin(data));
       }
       
-      constexpr uuid_variant variant() const noexcept
+      [[nodiscard]] constexpr uuid_variant variant() const noexcept
       {
          if ((data[8] & 0x80) == 0x00)
             return uuid_variant::ncs;
@@ -406,7 +409,7 @@ namespace uuids
             return uuid_variant::reserved;
       }
 
-      constexpr uuid_version version() const noexcept
+      [[nodiscard]] constexpr uuid_version version() const noexcept
       {
          if ((data[6] & 0xF0) == 0x10)
             return uuid_version::time_based;
@@ -422,7 +425,7 @@ namespace uuids
             return uuid_version::none;
       }
 
-      constexpr bool is_nil() const noexcept
+      [[nodiscard]] constexpr bool is_nil() const noexcept
       {
          for (size_t i = 0; i < data.size(); ++i) if (data[i] != 0) return false;
          return true;
@@ -433,13 +436,13 @@ namespace uuids
          data.swap(other.data);
       }
 
-      inline span<std::byte const, 16> as_bytes() const
+      [[nodiscard]] inline span<std::byte const, 16> as_bytes() const
       {
          return span<std::byte const, 16>(reinterpret_cast<std::byte const*>(data.data()), 16);
       }
 
       template <typename StringType>
-      constexpr static bool is_valid_uuid(StringType const & in_str) noexcept
+      [[nodiscard]] constexpr static bool is_valid_uuid(StringType const & in_str) noexcept
       {
          auto str = detail::to_string_view(in_str);
          bool firstDigit = true;
@@ -483,7 +486,7 @@ namespace uuids
       }
 
       template <typename StringType>
-      constexpr static std::optional<uuid> from_string(StringType const & in_str) noexcept
+      [[nodiscard]] constexpr static std::optional<uuid> from_string(StringType const & in_str) noexcept
       {
          auto str = detail::to_string_view(in_str);
          bool firstDigit = true;
@@ -548,17 +551,17 @@ namespace uuids
    // operators and non-member functions
    // --------------------------------------------------------------------------------------------------------------------------
 
-   inline bool operator== (uuid const& lhs, uuid const& rhs) noexcept
+   [[nodiscard]] inline bool operator== (uuid const& lhs, uuid const& rhs) noexcept
    {
       return lhs.data == rhs.data;
    }
 
-   inline bool operator!= (uuid const& lhs, uuid const& rhs) noexcept
+   [[nodiscard]] inline bool operator!= (uuid const& lhs, uuid const& rhs) noexcept
    {
       return !(lhs == rhs);
    }
 
-   inline bool operator< (uuid const& lhs, uuid const& rhs) noexcept
+   [[nodiscard]] inline bool operator< (uuid const& lhs, uuid const& rhs) noexcept
    {
       return lhs.data < rhs.data;
    }
@@ -566,7 +569,7 @@ namespace uuids
    template <class CharT,
              class Traits,
              class Allocator>
-   inline std::basic_string<CharT, Traits, Allocator> to_string(uuid const & id)
+   [[nodiscard]] inline std::basic_string<CharT, Traits, Allocator> to_string(uuid const & id)
    {
       std::basic_string<CharT, Traits, Allocator> uustr{detail::empty_guid<CharT>};
 
@@ -729,9 +732,9 @@ namespace uuids
       explicit basic_uuid_random_generator(engine_type* gen) :
          generator(gen, [](auto) {}) {}
 
-      uuid operator()()
+      [[nodiscard]] uuid operator()()
       {
-         uint8_t bytes[16];
+         alignas(uint32_t) uint8_t bytes[16];
          for (int i = 0; i < 16; i += 4)
             *reinterpret_cast<uint32_t*>(bytes + i) = distribution(*generator);
 
@@ -761,7 +764,7 @@ namespace uuids
       {}
 
       template <typename StringType>
-      uuid operator()(StringType const & name)
+      [[nodiscard]] uuid operator()(StringType const & name)
       {
          reset();
          process_characters(detail::to_string_view(name));
@@ -793,7 +796,7 @@ namespace uuids
          }
       }
 
-      uuid make_uuid()
+      [[nodiscard]] uuid make_uuid()
       {
          detail::sha1::digest8_t digest;
          hasher.get_digest_bytes(digest);
@@ -823,7 +826,7 @@ namespace uuids
 
       std::optional<mac_address> device_address;
 
-      bool get_mac_address()
+      [[nodiscard]] bool get_mac_address()
       {         
          if (device_address.has_value())
          {
@@ -846,7 +849,7 @@ namespace uuids
          return device_address.has_value();
       }
 
-      long long get_time_intervals()
+      [[nodiscard]] long long get_time_intervals()
       {
          auto start = std::chrono::system_clock::from_time_t(time_t(-12219292800));
          auto diff = std::chrono::system_clock::now() - start;
@@ -854,7 +857,7 @@ namespace uuids
          return ns / 100;
       }
 
-      static unsigned short get_clock_sequence()
+      [[nodiscard]] static unsigned short get_clock_sequence()
       {
          static std::mt19937 clock_gen(std::random_device{}());
          static std::uniform_int_distribution<unsigned short> clock_dis;
@@ -863,7 +866,7 @@ namespace uuids
       }
 
    public:
-      uuid operator()()
+      [[nodiscard]] uuid operator()()
       {
          if (get_mac_address())
          {
@@ -908,7 +911,7 @@ namespace std
       using argument_type = uuids::uuid;
       using result_type   = std::size_t;
 
-      result_type operator()(argument_type const &uuid) const
+      [[nodiscard]] result_type operator()(argument_type const &uuid) const
       {
 #ifdef UUID_HASH_STRING_BASED
          std::hash<std::string> hasher;
