@@ -16,7 +16,12 @@
 #include <chrono>
 #include <numeric>
 #include <atomic>
+
+#ifdef UUID_USING_CXX20_SPAN
 #include <span>
+#else
+#include <gsl/gsl>
+#endif
 
 #ifdef _WIN32
 
