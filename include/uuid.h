@@ -29,7 +29,7 @@
 #ifdef LIBUUID_CPP20_OR_GREATER
 #include <span>
 #else
-#include <gsl/gsl>
+#include <gsl/span>
 #endif
 
 #ifdef _WIN32
