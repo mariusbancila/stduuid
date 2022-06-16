@@ -45,11 +45,9 @@ endif()
 # Using span from std
 if (NOT UUID_USING_CXX20_SPAN)
     target_include_directories(${PROJECT_NAME} INTERFACE
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/gsl>
-            $<INSTALL_INTERFACE:include/gsl>)
-    if(UUID_ENABLE_INSTALL)
-        install(DIRECTORY gsl DESTINATION include)
-    endif()
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+            $<INSTALL_INTERFACE:include>)
+    install(DIRECTORY gsl DESTINATION include)
 endif ()
 
 if(UUID_ENABLE_INSTALL)

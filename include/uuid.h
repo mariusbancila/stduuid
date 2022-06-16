@@ -16,7 +16,21 @@
 #include <chrono>
 #include <numeric>
 #include <atomic>
+
+#ifdef __cplusplus
+
+#  if (__cplusplus >= 202002L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+#    define LIBUUID_CPP20_OR_GREATER
+#  endif
+
+#endif
+
+
+#ifdef LIBUUID_CPP20_OR_GREATER
 #include <span>
+#else
+#include <gsl/span>
+#endif
 
 #ifdef _WIN32
 
