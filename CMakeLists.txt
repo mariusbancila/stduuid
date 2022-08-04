@@ -43,7 +43,7 @@ if (UUID_TIME_GENERATOR)
 endif()
 
 # Using span from std
-if (NOT UUID_USING_CXX20_SPAN)
+if (NOT UUID_USING_CXX20_SPAN AND NOT TARGET GSL)
     target_include_directories(${PROJECT_NAME} INTERFACE
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
             $<INSTALL_INTERFACE:include>)
