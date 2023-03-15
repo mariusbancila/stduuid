@@ -52,7 +52,7 @@ endif ()
 
 if(UUID_ENABLE_INSTALL)
     # Install step and imported target
-    install(FILES include/uuid.h DESTINATION include)
+    install(FILES include/uuid.h DESTINATION include/uuid)
     install(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}-targets)
     install(EXPORT ${PROJECT_NAME}-targets
             DESTINATION lib/cmake/${PROJECT_NAME})
