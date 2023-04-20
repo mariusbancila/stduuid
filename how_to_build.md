@@ -38,3 +38,14 @@ cd build
 ```
    cmake -G Xcode ..
 ```
+
+## Linux
+
+Debian family:
+
+Install the dependency package (uuid-dev):
+
+```bash
+sudo apt-get install uuid-dev
+```
+
