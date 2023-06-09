@@ -64,7 +64,7 @@ if(UUID_ENABLE_INSTALL)
             INSTALL_DESTINATION lib/cmake/${PROJECT_NAME})
     write_basic_package_version_file(
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-version.cmake"
-            VERSION "1.0"
+            VERSION "1.2.3"
             COMPATIBILITY AnyNewerVersion)
     install(FILES
             "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}-config.cmake"
