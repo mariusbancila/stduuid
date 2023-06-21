@@ -19,7 +19,7 @@
 
 #ifdef __cplusplus
 
-#  if (__cplusplus >= 202002L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L)
+#  if (__cplusplus >= 202002L) || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L) || (defined(__GNUC__) && __GNUC__ == 10 && __cplusplus > 201703L)
 #    define LIBUUID_CPP20_OR_GREATER
 #  endif
 
