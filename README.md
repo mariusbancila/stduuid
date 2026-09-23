@@ -25,6 +25,8 @@ Generators:
 | `basic_uuid_random_generator` | a function object that generates version 4 UUIDs using a pseudo-random number generator engine. |
 | `uuid_random_generator` | a `basic_uuid_random_generator` using the Mersenne Twister engine (`basic_uuid_random_generator<std::mt19937>`) |
 | `uuid_name_generator` | a function object that generates version 5, name-based UUIDs using SHA1 hashing. |
+| `basic_uuid_unix_time_generator` | a function object that generates version 7 UUIDs (Unix Epoch time-based, RFC 9562) using a pseudo-random number generator engine and time |
+| `uuid_unix_time_generator` | a `basic_uuid_unix_time_generator` using the Mersenne Twister engine (`basic_uuid_unix_time_generator<std::mt19937>`) |
 | `uuid_system_generator` | a function object that generates new UUIDs using operating system resources (`CoCreateGuid` on Windows, `uuid_generate` on Linux, `CFUUIDCreate` on Mac) <br><br> **Note**: This is not part of the standard proposal. It is available only if the `UUID_SYSTEM_GENERATOR` macro is defined. |
 | `uuid_time_generator` | an experimental function object that generates time-based UUIDs.<br><br> **Note**:This is an experimental feature and should not be used in any production code. It is available only if the `UUID_TIME_GENERATOR` macro is defined. |
 
@@ -137,6 +139,32 @@ The following is a list of examples for using the library:
   ```
 
   Because the generated UUIDs are version 5 as defined by RFC 4122, the same namespace and name always produce the same UUID, in this and any other conforming implementation.
+
+* Creating a new UUID with the unix time generator
+
+  This produces version 7 UUIDs (Unix Epoch time-based, RFC 9562). The engine is used for the random bits, exactly as with the random generator. The call operator takes an optional time point that defaults to `std::chrono::system_clock::now()`.
+
+  ```cpp
+  std::random_device rd;
+  auto seed_data = std::array<int, std::mt19937::state_size> {};
+  std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+  std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+  std::mt19937 generator(seq);
+
+  uuids::uuid_unix_time_generator gen{generator};
+  uuid const id = gen();
+
+  assert(!id.is_nil());
+  assert(id.version() == uuids::uuid_version::unix_epoch_time_based);
+  assert(id.variant() == uuids::uuid_variant::rfc);
+  ```
+
+  Because the timestamp occupies the leading bytes, version 7 UUIDs sort in creation order, which the random and name-based versions do not. A specific time point can be passed instead of the default.
+
+  ```cpp
+  auto tp = std::chrono::system_clock::from_time_t(1624363200);
+  uuid const id = gen(tp);
+  ```
 
 * Create a UUID from a string
 
