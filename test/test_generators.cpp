@@ -297,6 +297,49 @@ TEST_CASE("Test name generator equality (char const*, std::string, std::string_v
    REQUIRE(id2 == id3);
 }
 
+TEST_CASE("Test unix time generator", "[gen][unix]")
+{
+   std::random_device rd;
+   auto seed_data = std::array<int, std::mt19937::state_size> {};
+   std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+   std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+   std::mt19937 generator(seq);
+
+   uuids::uuid_unix_time_generator dgen(generator);
+
+   auto id = dgen();
+   REQUIRE(!id.is_nil());
+   REQUIRE(id.version() == uuids::uuid_version::unix_epoch_time_based);
+   REQUIRE(id.variant() == uuids::uuid_variant::rfc);
+
+   std::set<uuids::uuid> ids;
+   for (int i = 0; i < 100; ++i)
+      ids.insert(dgen());
+   REQUIRE(ids.size() == 100);
+}
+
+TEST_CASE("Test unix time generator with explicit time point", "[gen][unix]")
+{
+   std::random_device rd;
+   auto seed_data = std::array<int, std::mt19937::state_size> {};
+   std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+   std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+   std::mt19937 generator(seq);
+
+   uuids::uuid_unix_time_generator dgen(generator);
+
+   // 2021-06-22T12:00:00Z, timestamp_ms = 1624363200000 = 0x017a33976e00
+   auto const tp = std::chrono::system_clock::from_time_t(1624363200);
+   auto id = dgen(tp);
+
+   REQUIRE(id.version() == uuids::uuid_version::unix_epoch_time_based);
+   REQUIRE(id.variant() == uuids::uuid_variant::rfc);
+
+   auto const str = uuids::to_string(id);
+   REQUIRE(str.substr(0, 13) == "017a3397-6e00");
+   REQUIRE(str[14] == '7');
+}
+
 #ifdef UUID_TIME_GENERATOR
 TEST_CASE("Test time generator", "[gen][time]")
 {

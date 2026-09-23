@@ -384,7 +384,8 @@ namespace uuids
       dce_security = 2,  // DCE Security version, with embedded POSIX UIDs.
       name_based_md5 = 3,  // The name-based version specified in RFS 4122 with MD5 hashing
       random_number_based = 4,  // The randomly or pseudo-randomly generated version specified in RFS 4122
-      name_based_sha1 = 5   // The name-based version specified in RFS 4122 with SHA1 hashing
+      name_based_sha1 = 5,   // The name-based version specified in RFS 4122 with SHA1 hashing
+      unix_epoch_time_based = 7   // The Unix Epoch time-based version specified in RFC 9562
    };
 
    // Forward declare uuid & to_string so that we can declare to_string as a friend later.
@@ -450,6 +451,8 @@ namespace uuids
             return uuid_version::random_number_based;
          else if ((data[6] & 0xF0) == 0x50)
             return uuid_version::name_based_sha1;
+         else if ((data[6] & 0xF0) == 0x70)
+            return uuid_version::unix_epoch_time_based;
          else
             return uuid_version::none;
       }
@@ -799,7 +802,54 @@ namespace uuids
    };
 
    using uuid_random_generator = basic_uuid_random_generator<std::mt19937>;
-   
+
+   template <typename UniformRandomNumberGenerator>
+   class basic_uuid_unix_time_generator
+   {
+   public:
+      using engine_type = UniformRandomNumberGenerator;
+
+      explicit basic_uuid_unix_time_generator(engine_type& gen) :
+         generator(&gen, [](auto) {}) {}
+      explicit basic_uuid_unix_time_generator(engine_type* gen) :
+         generator(gen, [](auto) {}) {}
+
+      [[nodiscard]] uuid operator()(
+         std::chrono::system_clock::time_point const tp = std::chrono::system_clock::now())
+      {
+         alignas(uint32_t) uint8_t bytes[16];
+         for (int i = 0; i < 16; i += 4)
+            *reinterpret_cast<uint32_t*>(bytes + i) = distribution(*generator);
+
+         uint64_t const ms = static_cast<uint64_t>(
+            std::chrono::duration_cast<std::chrono::milliseconds>(
+               tp.time_since_epoch()).count());
+
+         bytes[0] = static_cast<uint8_t>(ms >> 40);
+         bytes[1] = static_cast<uint8_t>(ms >> 32);
+         bytes[2] = static_cast<uint8_t>(ms >> 24);
+         bytes[3] = static_cast<uint8_t>(ms >> 16);
+         bytes[4] = static_cast<uint8_t>(ms >> 8);
+         bytes[5] = static_cast<uint8_t>(ms);
+
+         // version must be 0111xxxx
+         bytes[6] &= 0x0F;
+         bytes[6] |= 0x70;
+
+         // variant must be 10xxxxxx
+         bytes[8] &= 0x3F;
+         bytes[8] |= 0x80;
+
+         return uuid{std::begin(bytes), std::end(bytes)};
+      }
+
+   private:
+      std::uniform_int_distribution<uint32_t>  distribution;
+      std::shared_ptr<UniformRandomNumberGenerator> generator;
+   };
+
+   using uuid_unix_time_generator = basic_uuid_unix_time_generator<std::mt19937>;
+
    class uuid_name_generator
    {
    public:
