@@ -11,6 +11,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(GNUInstallDirs)
 
 option(UUID_BUILD_TESTS "Build the unit tests" ${UUID_MAIN_PROJECT})
+option(UUID_BUILD_BENCH "Build the benchmarks" ${UUID_MAIN_PROJECT})
 option(UUID_SYSTEM_GENERATOR "Enable operating system uuid generator" OFF)
 option(UUID_TIME_GENERATOR "Enable experimental time-based uuid generator" OFF)
 option(UUID_USING_CXX20_SPAN "Using span from std instead of gsl" OFF)
@@ -91,4 +92,9 @@ endif()
 if (UUID_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif ()
+
+# Benchmarks
+if (UUID_BUILD_BENCH)
+    add_subdirectory(bench)
 endif ()

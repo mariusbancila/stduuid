@@ -359,5 +359,14 @@ The tests are compiled with C++17 by default. Set the `CXX_STD_VER` variable to 
 cmake -S . -B build -DCXX_STD_VER=cxx_std_20
 ```
 
+## Benchmarking
+A benchmark that compares the SIMD accelerated implementation with the original scalar one is available in the `bench` directory. It is built when stduuid is the top-level project, or when the `UUID_BUILD_BENCH` variable is set to `ON`.
+```
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+./build/bench/bench_stduuid
+```
+See [bench/README.md](bench/README.md) for the measured operations and sample results.
+
 ## Credits
 The SHA1 implementation is based on the [TinySHA1](https://github.com/mohaps/TinySHA1) library.
